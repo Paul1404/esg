@@ -14,13 +14,19 @@ const FONT_OPTIONS: { label: string; value: string }[] = [
   { label: 'Courier (mono)', value: "'Courier New', Courier, monospace" },
 ];
 
-const PRESETS: { name: string; primary: string; text: string; muted: string; divider: string }[] = [
-  { name: 'Iris', primary: '#7c5cff', text: '#1f2330', muted: '#6b7385', divider: '#e2e5ec' },
-  { name: 'Forest', primary: '#10b981', text: '#0f1f17', muted: '#5a6b62', divider: '#dbe8e1' },
-  { name: 'Sunset', primary: '#ef4444', text: '#231a1a', muted: '#7a6262', divider: '#ecdcdc' },
-  { name: 'Ocean', primary: '#0ea5e9', text: '#0c1f2a', muted: '#566c7a', divider: '#d8e6ee' },
-  { name: 'Slate', primary: '#475569', text: '#0f172a', muted: '#64748b', divider: '#e2e8f0' },
-  { name: 'Gold', primary: '#b45309', text: '#1f1a0a', muted: '#7a6b46', divider: '#ecdcc4' },
+// Presets tuned to read well on both white and dark email backgrounds. Text
+// colors stay in the mid-dark range (around #2a-#33) so Apple Mail and
+// Outlook iOS auto-invert to a comfortable mid-light, and accent colors are
+// chosen for sufficient contrast on both backgrounds.
+const PRESETS: { name: string; primary: string; text: string; muted: string; divider: string; tag?: string }[] = [
+  { name: 'Graphite', primary: '#475569', text: '#2a3340', muted: '#6b7280', divider: '#e5e7eb', tag: 'Neutral' },
+  { name: 'Iris',     primary: '#6e54e0', text: '#2a2940', muted: '#6b7280', divider: '#e5e3ec', tag: 'Vibrant' },
+  { name: 'Slate Blue', primary: '#3b82f6', text: '#2a3340', muted: '#64748b', divider: '#e2e8f0', tag: 'Cool' },
+  { name: 'Sage',     primary: '#16a34a', text: '#2a3328', muted: '#5a6b5e', divider: '#dbe8de', tag: 'Calm' },
+  { name: 'Ocean',    primary: '#0284c7', text: '#22323d', muted: '#566c7a', divider: '#d8e6ee', tag: 'Cool' },
+  { name: 'Berry',    primary: '#be185d', text: '#33222b', muted: '#7a5969', divider: '#ecd9e2', tag: 'Warm' },
+  { name: 'Sunset',   primary: '#ea580c', text: '#332419', muted: '#7a6755', divider: '#ecdfd3', tag: 'Warm' },
+  { name: 'Mono',     primary: '#374151', text: '#1f2937', muted: '#6b7280', divider: '#e5e7eb', tag: 'Minimal' },
 ];
 
 export default function StyleSection({ data, update }: Props) {
@@ -35,11 +41,17 @@ export default function StyleSection({ data, update }: Props) {
     <div className="space-y-4">
       <h3 className="section-title">Style</h3>
 
-      <Field label="Color presets">
+      <Field label="Color presets" hint="All presets read well on both light and dark email backgrounds.">
         <div className="flex flex-wrap gap-1.5">
           {PRESETS.map((p) => (
-            <button key={p.name} onClick={() => applyPreset(p)} className="flex items-center gap-1.5 pill hover:border-border-strong">
-              <span className="h-3 w-3 rounded-full" style={{ background: p.primary }} />
+            <button
+              key={p.name}
+              onClick={() => applyPreset(p)}
+              type="button"
+              className="flex items-center gap-1.5 pill hover:border-border-strong"
+              title={p.tag ? `${p.name} (${p.tag})` : p.name}
+            >
+              <span className="h-3 w-3 rounded-full" style={{ background: p.primary }} aria-hidden="true" />
               {p.name}
             </button>
           ))}

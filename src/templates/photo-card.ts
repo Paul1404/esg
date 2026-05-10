@@ -5,6 +5,8 @@ import {
   esc,
   escMultiline,
   img,
+  renderClose,
+  renderCompanyLegal,
   renderSocialRow,
   wrapSignature,
 } from '@/lib/template-helpers';
@@ -19,7 +21,11 @@ export function renderPhotoCard(d: SignatureData): string {
 
   const tintBg = `${accent}1a`; // ~10% alpha hex (8-digit hex falls back gracefully in clients that ignore it)
 
+  const close = renderClose({ value: d.complimentaryClose, textColor: text, fontFamily, fontSize: baseSize });
+  const legal = renderCompanyLegal({ value: d.companyLegal, mutedColor: muted, dividerColor: d.dividerColor, fontFamily, fontSize: baseSize });
+
   const inner = `
+${close}
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;background-color:${tintBg};border-radius:12px;">
   <tr>
     ${d.photoUrl ? `<td valign="top" width="120" style="width:120px;padding:18px 0 18px 18px;">${img({ src: d.photoUrl, alt: d.fullName, width: 110, height: 110, round: true, style: 'border:4px solid #ffffff;' })}</td>` : ''}
@@ -31,6 +37,7 @@ export function renderPhotoCard(d: SignatureData): string {
       ${socialRow ? `<div style="padding-top:12px;">${socialRow}</div>` : ''}
     </td>
   </tr>
+  ${d.companyLegal ? `<tr><td colspan="${d.photoUrl ? 2 : 1}" style="padding:0 18px ${d.disclaimer ? '0' : '14px'} 18px;">${legal}</td></tr>` : ''}
   ${d.disclaimer ? `<tr><td colspan="${d.photoUrl ? 2 : 1}" style="padding:0 18px 14px 18px;"><div style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.5;">${escMultiline(d.disclaimer)}</div></td></tr>` : ''}
 </table>`;
 

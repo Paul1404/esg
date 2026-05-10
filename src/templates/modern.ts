@@ -7,6 +7,8 @@ import {
   img,
   logoImg,
   renderButton,
+  renderClose,
+  renderCompanyLegal,
   renderSocialRow,
   safeUrl,
   wrapSignature,
@@ -56,8 +58,12 @@ export function renderModern(d: SignatureData): string {
       }</td></tr>`
     : '';
 
+  const close = renderClose({ value: d.complimentaryClose, textColor: text, fontFamily, fontSize: baseSize, tableRow: true });
+  const legal = renderCompanyLegal({ value: d.companyLegal, mutedColor: muted, dividerColor: divider, fontFamily, fontSize: baseSize, tableRow: true, withDivider: !d.disclaimer });
+
   const inner = `
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
+  ${close}
   <tr>
     ${photoCell}
     <td valign="top" style="border-left:3px solid ${accent};padding:0 0 0 16px;">
@@ -78,6 +84,7 @@ export function renderModern(d: SignatureData): string {
   ${socialBlock}
   ${d.quote ? `<tr><td style="padding:14px 0 0 0;border-top:1px solid ${divider};margin-top:14px;"><div style="font-family:${fontFamily};font-style:italic;color:${muted};font-size:${baseSize - 1}px;line-height:1.5;padding-top:14px;">“${esc(d.quote)}”</div></td></tr>` : ''}
   ${banner}
+  ${legal}
   ${d.disclaimer ? `<tr><td style="padding:14px 0 0 0;"><div style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.4;">${escMultiline(d.disclaimer)}</div></td></tr>` : ''}
 </table>`;
 

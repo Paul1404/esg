@@ -6,6 +6,8 @@ import {
   escMultiline,
   img,
   logoImg,
+  renderClose,
+  renderCompanyLegal,
   renderSocialRow,
   safeUrl,
   wrapSignature,
@@ -22,8 +24,12 @@ export function renderLogoBottom(d: SignatureData): string {
   const logoMaxH = Math.round(40 * logoScale);
   const logoMaxW = Math.round(160 * logoScale);
 
+  const close = renderClose({ value: d.complimentaryClose, textColor: text, fontFamily, fontSize: baseSize, tableRow: true });
+  const legal = renderCompanyLegal({ value: d.companyLegal, mutedColor: muted, dividerColor: divider, fontFamily, fontSize: baseSize, tableRow: true });
+
   const inner = `
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
+  ${close}
   <tr><td style="font-family:${fontFamily};font-size:${baseSize + 4}px;font-weight:700;color:${text};line-height:1.2;text-transform:uppercase;letter-spacing:0.5px;">${esc(d.fullName)}${credentialSuffix}</td></tr>
   <tr><td style="font-family:${fontFamily};font-size:${baseSize}px;color:${accent};line-height:1.4;font-weight:600;padding-top:3px;">${esc(d.jobTitle)}${d.department ? ` · ${esc(d.department)}` : ''}</td></tr>
   <tr><td style="font-family:${fontFamily};font-size:${baseSize}px;color:${muted};line-height:1.4;padding-top:1px;">${esc(d.company)}</td></tr>
@@ -47,6 +53,7 @@ export function renderLogoBottom(d: SignatureData): string {
       ? `<a href="${safeUrl(d.bannerLink)}" target="_blank" rel="noopener" style="text-decoration:none;">${img({ src: d.bannerUrl, alt: 'Banner', width: d.layoutWidth, height: Math.round(d.layoutWidth * 0.18), style: 'max-width:100%;' })}</a>`
       : img({ src: d.bannerUrl, alt: 'Banner', width: d.layoutWidth, height: Math.round(d.layoutWidth * 0.18), style: 'max-width:100%;' })
   }</td></tr>` : ''}
+  ${legal}
   ${d.disclaimer ? `<tr><td style="padding:14px 0 0 0;"><div style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.5;">${escMultiline(d.disclaimer)}</div></td></tr>` : ''}
 </table>`;
 
