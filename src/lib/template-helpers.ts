@@ -235,6 +235,20 @@ export function img(opts: { src: string; alt: string; width: number; height: num
 }
 
 /**
+ * Logo-shaped image: aspect-ratio preserving, bounded by a max box. Use this
+ * for company logos where we don't know the source ratio (square shields,
+ * wide wordmarks, etc.). Modern clients use the CSS max-width/max-height to
+ * scale proportionally; Outlook desktop falls back to the attr dimensions and
+ * may letterbox or stretch — that's the documented trade-off.
+ */
+export function logoImg(opts: { src: string; alt: string; maxHeight: number; maxWidth: number; style?: string; display?: 'block' | 'inline-block' }): string {
+  const { alt, maxHeight, maxWidth, display = 'block' } = opts;
+  const src = normalizeImgSrc(opts.src);
+  const style = `display:${display};border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;height:auto;width:auto;max-height:${maxHeight}px;max-width:${maxWidth}px;${opts.style ?? ''}`;
+  return `<img src="${esc(src)}" alt="${esc(alt)}" width="${maxWidth}" height="${maxHeight}" style="${style}" />`;
+}
+
+/**
  * Build a plain-text fallback signature for clients that strip HTML
  * (or for users to paste into terminals/Slack).
  */
