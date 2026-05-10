@@ -3,6 +3,7 @@ import {
   buildContactRows,
   contactRowHtml,
   esc,
+  escMultiline,
   img,
   renderButton,
   renderSocialRow,
@@ -69,7 +70,7 @@ export function renderModern(d: SignatureData): string {
   ${socialBlock}
   ${d.quote ? `<tr><td style="padding:14px 0 0 0;border-top:1px solid ${divider};margin-top:14px;"><div style="font-family:${fontFamily};font-style:italic;color:${muted};font-size:${baseSize - 1}px;line-height:1.5;padding-top:14px;">“${esc(d.quote)}”</div></td></tr>` : ''}
   ${banner}
-  ${d.disclaimer ? `<tr><td style="padding:14px 0 0 0;"><div style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.4;">${esc(d.disclaimer)}</div></td></tr>` : ''}
+  ${d.disclaimer ? `<tr><td style="padding:14px 0 0 0;"><div style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.4;">${escMultiline(d.disclaimer)}</div></td></tr>` : ''}
 </table>`;
 
   return wrapSignature({ width: d.layoutWidth, inner, fontFamily, fontSize: baseSize });

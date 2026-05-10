@@ -1,5 +1,5 @@
 import type { SignatureData } from '@/lib/types';
-import { esc, img, renderSocialRow, safeUrl, wrapSignature } from '@/lib/template-helpers';
+import { esc, escMultiline, img, renderSocialRow, safeUrl, wrapSignature } from '@/lib/template-helpers';
 
 export function renderHorizontal(d: SignatureData): string {
   const { fontFamily, fontSize: baseSize, primaryColor: accent, textColor: text, mutedColor: muted, dividerColor: divider } = d;
@@ -24,7 +24,7 @@ export function renderHorizontal(d: SignatureData): string {
     </td>
     ${socialRow ? `<td valign="middle" align="right" style="padding-left:12px;">${socialRow}</td>` : ''}
   </tr>
-  ${d.disclaimer ? `<tr><td colspan="${d.photoUrl ? 3 : 2}" style="padding-top:8px;border-top:1px solid ${divider};margin-top:8px;"><div style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.4;padding-top:8px;">${esc(d.disclaimer)}</div></td></tr>` : ''}
+  ${d.disclaimer ? `<tr><td colspan="${d.photoUrl ? 3 : 2}" style="padding-top:8px;border-top:1px solid ${divider};margin-top:8px;"><div style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.4;padding-top:8px;">${escMultiline(d.disclaimer)}</div></td></tr>` : ''}
 </table>`;
 
   return wrapSignature({ width: d.layoutWidth, inner, fontFamily, fontSize: baseSize });

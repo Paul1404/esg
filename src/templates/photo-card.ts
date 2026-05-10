@@ -3,6 +3,7 @@ import {
   buildContactRows,
   contactRowHtml,
   esc,
+  escMultiline,
   img,
   renderSocialRow,
   wrapSignature,
@@ -30,7 +31,7 @@ export function renderPhotoCard(d: SignatureData): string {
       ${socialRow ? `<div style="padding-top:12px;">${socialRow}</div>` : ''}
     </td>
   </tr>
-  ${d.disclaimer ? `<tr><td colspan="${d.photoUrl ? 2 : 1}" style="padding:0 18px 14px 18px;"><div style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.5;">${esc(d.disclaimer)}</div></td></tr>` : ''}
+  ${d.disclaimer ? `<tr><td colspan="${d.photoUrl ? 2 : 1}" style="padding:0 18px 14px 18px;"><div style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.5;">${escMultiline(d.disclaimer)}</div></td></tr>` : ''}
 </table>`;
 
   return wrapSignature({ width: d.layoutWidth, inner, fontFamily, fontSize: baseSize });

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
 import sharp from 'sharp';
-import { isS3Configured, publicUrlForKey, uploadObject } from '@/lib/s3';
+import { isS3Configured, uploadObject } from '@/lib/s3';
 import { prisma } from '@/lib/db';
 import { clientKey, rateLimit } from '@/lib/rate-limit';
 
@@ -79,14 +79,14 @@ export async function POST(req: Request) {
   const key = `signatures/${kind}/${new Date().toISOString().slice(0, 10)}/${nanoid(16)}.${ext}`;
   await uploadObject({ key, body: processed, contentType: outputType });
 
-  // Prefer S3_PUBLIC_BASE_URL (CDN / public bucket) when set. Otherwise serve
-  // through the /i proxy: most S3-compatible providers ignore object-level
-  // public-read ACLs, so direct {endpoint}/{bucket}/{key} URLs return 403
-  // when embedded in emails.
-  const direct = publicUrlForKey(key);
+  // Always serve through the /i proxy. S3-compatible providers (Tigris, R2,
+  // S3 with Block Public Access, Minio with private buckets) silently drop
+  // object-level public-read ACLs, so direct {endpoint}/{bucket}/{key} URLs
+  // return AccessDenied the moment a recipient opens the email. The proxy
+  // uses the app's S3 credentials and works regardless of bucket policy.
   const appOrigin =
     process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ?? new URL(req.url).origin;
-  const url = direct ?? `${appOrigin}/i/${key}`;
+  const url = `${appOrigin}/i/${key}`;
 
   // Best-effort persistence; ignore failure so uploads still work without DB.
   try {
