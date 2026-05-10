@@ -7,6 +7,52 @@ type Props = { data: SignatureData; update: <K extends keyof SignatureData>(k: K
 
 type Slot = 'photo' | 'logo' | 'banner';
 
+type ImageRowProps = {
+  slot: Slot;
+  label: string;
+  urlKey: keyof SignatureData;
+  hint?: string;
+  data: SignatureData;
+  update: Props['update'];
+  busy: Slot | null;
+  onUpload: (slot: Slot, file: File) => void;
+};
+
+function ImageRow({ slot, label, urlKey, hint, data, update, busy, onUpload }: ImageRowProps) {
+  const url = (data[urlKey] as string) ?? '';
+  return (
+    <div className="card p-3 space-y-2">
+      <div className="flex items-center justify-between">
+        <div className="text-sm font-medium">{label}</div>
+        <div className="flex items-center gap-2">
+          <label className="btn-soft text-xs cursor-pointer">
+            {busy === slot ? 'Uploading…' : 'Upload'}
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) onUpload(slot, f);
+                e.currentTarget.value = '';
+              }}
+            />
+          </label>
+          {url ? (
+            <button onClick={() => update(urlKey, '' as never)} className="btn-ghost text-xs">Remove</button>
+          ) : null}
+        </div>
+      </div>
+      <input className="input-sm" value={url} onChange={(e) => update(urlKey, e.target.value as never)} placeholder="https://… or upload above" />
+      {hint ? <div className="text-xs text-text-dim">{hint}</div> : null}
+      {url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={url} alt="" className="mt-1 rounded border border-border max-h-24 bg-bg-elev" />
+      ) : null}
+    </div>
+  );
+}
+
 export default function ImagesSection({ data, update }: Props) {
   const [busy, setBusy] = useState<Slot | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -31,47 +77,14 @@ export default function ImagesSection({ data, update }: Props) {
     }
   };
 
-  const ImageRow = ({ slot, label, urlKey, hint }: { slot: Slot; label: string; urlKey: keyof SignatureData; hint?: string }) => {
-    const url = (data[urlKey] as string) ?? '';
-    return (
-      <div className="card p-3 space-y-2">
-        <div className="flex items-center justify-between">
-          <div className="text-sm font-medium">{label}</div>
-          <div className="flex items-center gap-2">
-            <label className="btn-soft text-xs cursor-pointer">
-              {busy === slot ? 'Uploading…' : 'Upload'}
-              <input
-                type="file"
-                accept="image/png,image/jpeg,image/webp,image/gif"
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) upload(slot, f);
-                  e.currentTarget.value = '';
-                }}
-              />
-            </label>
-            {url ? (
-              <button onClick={() => update(urlKey, '' as never)} className="btn-ghost text-xs">Remove</button>
-            ) : null}
-          </div>
-        </div>
-        <input className="input-sm" value={url} onChange={(e) => update(urlKey, e.target.value as never)} placeholder="https://… or upload above" />
-        {hint ? <div className="text-xs text-text-dim">{hint}</div> : null}
-        {url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={url} alt="" className="mt-1 rounded border border-border max-h-24 bg-bg-elev" />
-        ) : null}
-      </div>
-    );
-  };
+  const rowProps = { data, update, busy, onUpload: upload };
 
   return (
     <div className="space-y-4">
       <h3 className="section-title">Images</h3>
-      <ImageRow slot="photo" label="Profile photo" urlKey="photoUrl" hint="Square, 200×200+. Will be re-encoded and stripped of EXIF." />
-      <ImageRow slot="logo" label="Company logo" urlKey="logoUrl" hint="Transparent PNG works best." />
-      <ImageRow slot="banner" label="Promo banner" urlKey="bannerUrl" hint="Wide, ~3:1 ratio. Optional click-through below." />
+      <ImageRow {...rowProps} slot="photo" label="Profile photo" urlKey="photoUrl" hint="Square, 200×200+. Will be re-encoded and stripped of EXIF." />
+      <ImageRow {...rowProps} slot="logo" label="Company logo" urlKey="logoUrl" hint="Transparent PNG works best." />
+      <ImageRow {...rowProps} slot="banner" label="Promo banner" urlKey="bannerUrl" hint="Wide, ~3:1 ratio. Optional click-through below." />
       <Field label="Banner click-through URL">
         <input className="input" value={data.bannerLink ?? ''} onChange={(e) => update('bannerLink', e.target.value)} placeholder="https://example.com/promo" />
       </Field>

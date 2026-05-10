@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@config '../../tailwind.config.ts';
 
 :root {
   color-scheme: dark;
@@ -34,13 +33,13 @@ html, body {
     @apply inline-flex items-center justify-center gap-1.5 rounded-md text-sm font-medium px-3 py-2 transition disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-primary {
-    @apply btn bg-accent text-white hover:bg-accent-hover;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-md text-sm font-medium px-3 py-2 transition disabled:opacity-50 disabled:cursor-not-allowed bg-accent text-white hover:bg-accent-hover;
   }
   .btn-ghost {
-    @apply btn bg-bg-elev text-text border border-border hover:border-border-strong;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-md text-sm font-medium px-3 py-2 transition disabled:opacity-50 disabled:cursor-not-allowed bg-bg-elev text-text border border-border hover:border-border-strong;
   }
   .btn-soft {
-    @apply btn bg-accent-soft text-accent hover:bg-accent/20;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-md text-sm font-medium px-3 py-2 transition disabled:opacity-50 disabled:cursor-not-allowed bg-accent-soft text-accent hover:bg-accent/20;
   }
   .card {
     @apply bg-bg-card border border-border rounded-lg;

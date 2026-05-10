@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { DEFAULT_SIGNATURE, TEMPLATE_LIST, type SignatureData, type SocialPlatform, type TemplateId } from '@/lib/types';
 import IdentitySection from './sections/IdentitySection';
 import ContactSection from './sections/ContactSection';
@@ -27,7 +27,6 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 export default function EditorClient() {
-  const router = useRouter();
   const search = useSearchParams();
   const initialTemplate = (search.get('template') as TemplateId) || 'modern';
   const [template, setTemplate] = useState<TemplateId>(initialTemplate);
@@ -41,6 +40,7 @@ export default function EditorClient() {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- post-hydration init from localStorage
         if (parsed.data) setData({ ...DEFAULT_SIGNATURE, ...parsed.data });
         if (parsed.template) setTemplate(parsed.template);
       }
