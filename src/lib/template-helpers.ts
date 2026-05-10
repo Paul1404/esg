@@ -165,15 +165,30 @@ export function buildContactRows(d: SignatureData): ContactRow[] {
   return rows;
 }
 
-export function contactRowHtml(row: ContactRow, opts: { textColor: string; mutedColor: string; primaryColor: string; fontFamily: string; fontSize: number }): string {
-  const { textColor, mutedColor, primaryColor, fontFamily, fontSize } = opts;
+export function contactRowHtml(row: ContactRow, opts: { textColor: string; mutedColor: string; primaryColor: string; fontFamily: string; fontSize: number; iconStyle?: 'letter' | 'pill' }): string {
+  const { textColor, mutedColor, primaryColor, fontFamily, fontSize, iconStyle = 'letter' } = opts;
   const valueHtml = row.href
     ? `<a href="${safeUrl(row.href)}" style="color:${textColor};text-decoration:none;">${esc(row.value)}</a>`
     : esc(row.value);
+
+  const labelCell = iconStyle === 'pill'
+    ? (() => {
+        const size = Math.max(18, fontSize + 4);
+        return `<td valign="middle" width="${size + 10}" style="width:${size + 10}px;padding:3px 10px 3px 0;">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+        <tr><td align="center" valign="middle" width="${size}" height="${size}" style="width:${size}px;height:${size}px;background-color:${primaryColor};border-radius:4px;mso-line-height-rule:exactly;line-height:${size}px;font-family:${fontFamily};font-size:${Math.floor(size * 0.55)}px;font-weight:700;color:#ffffff;text-align:center;">${esc(row.label)}</td></tr>
+      </table>
+    </td>`;
+      })()
+    : `<td valign="top" width="20" style="width:20px;padding:2px 8px 2px 0;font-family:${fontFamily};font-size:${fontSize - 2}px;line-height:1.4;color:${primaryColor};font-weight:700;letter-spacing:0.5px;">${esc(row.label)}</td>`;
+
+  const valueAlign = iconStyle === 'pill' ? 'middle' : 'top';
+  const valuePad = iconStyle === 'pill' ? '3px 0' : '2px 0';
+
   return `
     <tr>
-      <td valign="top" width="20" style="width:20px;padding:2px 8px 2px 0;font-family:${fontFamily};font-size:${fontSize - 2}px;line-height:1.4;color:${primaryColor};font-weight:700;letter-spacing:0.5px;">${esc(row.label)}</td>
-      <td valign="top" style="font-family:${fontFamily};font-size:${fontSize - 1}px;line-height:1.5;color:${mutedColor};padding:2px 0;">${valueHtml}</td>
+      ${labelCell}
+      <td valign="${valueAlign}" style="font-family:${fontFamily};font-size:${fontSize - 1}px;line-height:1.5;color:${mutedColor};padding:${valuePad};">${valueHtml}</td>
     </tr>`;
 }
 
@@ -232,6 +247,20 @@ export function img(opts: { src: string; alt: string; width: number; height: num
   const radius = round ? `border-radius:${Math.floor(width / 2)}px;` : '';
   const style = `display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;${radius}${opts.style ?? ''}`;
   return `<img src="${esc(src)}" alt="${esc(alt)}" width="${width}" height="${height}" style="${style}" />`;
+}
+
+/**
+ * Logo-shaped image: aspect-ratio preserving, bounded by a max box. Use this
+ * for company logos where we don't know the source ratio (square shields,
+ * wide wordmarks, etc.). Modern clients use the CSS max-width/max-height to
+ * scale proportionally; Outlook desktop falls back to the attr dimensions and
+ * may letterbox or stretch — that's the documented trade-off.
+ */
+export function logoImg(opts: { src: string; alt: string; maxHeight: number; maxWidth: number; style?: string; display?: 'block' | 'inline-block' }): string {
+  const { alt, maxHeight, maxWidth, display = 'block' } = opts;
+  const src = normalizeImgSrc(opts.src);
+  const style = `display:${display};border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;height:auto;width:auto;max-height:${maxHeight}px;max-width:${maxWidth}px;${opts.style ?? ''}`;
+  return `<img src="${esc(src)}" alt="${esc(alt)}" width="${maxWidth}" height="${maxHeight}" style="${style}" />`;
 }
 
 /**

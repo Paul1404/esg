@@ -13,7 +13,7 @@ import {
 export function renderCreative(d: SignatureData): string {
   const { fontFamily, fontSize: baseSize, primaryColor: accent, textColor: text, mutedColor: muted } = d;
   const rows = buildContactRows(d)
-    .map((r) => contactRowHtml(r, { textColor: text, mutedColor: muted, primaryColor: accent, fontFamily, fontSize: baseSize }))
+    .map((r) => contactRowHtml(r, { textColor: text, mutedColor: muted, primaryColor: accent, fontFamily, fontSize: baseSize, iconStyle: 'pill' }))
     .join('');
   const socialRow = renderSocialRow(d.socials, '#ffffff', 24);
   const credentialSuffix = d.credentials ? `, ${esc(d.credentials)}` : '';
