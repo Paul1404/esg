@@ -7,12 +7,13 @@ import SharedActions from './SharedActions';
 
 export const dynamic = 'force-dynamic';
 
-type Props = { params: { slug: string } };
+type Props = { params: Promise<{ slug: string }> };
 
 export default async function SharedSignaturePage({ params }: Props) {
+  const { slug } = await params;
   let sig;
   try {
-    sig = await prisma.signature.findUnique({ where: { slug: params.slug } });
+    sig = await prisma.signature.findUnique({ where: { slug } });
     if (sig) {
       await prisma.signature.update({ where: { id: sig.id }, data: { views: { increment: 1 } } }).catch(() => {});
     }
