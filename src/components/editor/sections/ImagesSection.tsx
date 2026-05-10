@@ -65,8 +65,27 @@ export default function ImagesSection({ data, update }: Props) {
       fd.append('file', file);
       fd.append('kind', slot);
       const res = await fetch('/api/upload', { method: 'POST', body: fd });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? 'Upload failed');
+      // The upload route may return a non-JSON body on framework-level errors
+      // (e.g. payload too large rejected before our handler runs). Parse text
+      // first so we can surface a useful message instead of a JSON parse crash.
+      const raw = await res.text();
+      let json: { url?: string; error?: string } = {};
+      if (raw) {
+        try {
+          json = JSON.parse(raw);
+        } catch {
+          json = {};
+        }
+      }
+      if (!res.ok || !json.url) {
+        const fallback =
+          res.status === 413
+            ? 'File too large for the server to accept'
+            : res.status === 503
+              ? 'Image storage is not configured on the server'
+              : `Upload failed (HTTP ${res.status})`;
+        throw new Error(json.error ?? fallback);
+      }
       if (slot === 'photo') update('photoUrl', json.url);
       if (slot === 'logo') update('logoUrl', json.url);
       if (slot === 'banner') update('bannerUrl', json.url);
