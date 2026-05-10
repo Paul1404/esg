@@ -4,19 +4,24 @@ import { useMemo, useState } from 'react';
 import { renderTemplate } from '@/templates';
 import type { SignatureData, TemplateId } from '@/lib/types';
 import { buildPlainText, buildVCard } from '@/lib/template-helpers';
+import SavesPane from './SavesPane';
 
-type Tab = 'install' | 'html' | 'plaintext' | 'share';
+type Tab = 'install' | 'html' | 'plaintext' | 'saves';
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'install', label: 'Install' },
   { id: 'html', label: 'HTML' },
   { id: 'plaintext', label: 'Plain text' },
-  { id: 'share', label: 'Share' },
+  { id: 'saves', label: 'Saves' },
 ];
 
-type Props = { data: SignatureData; template: TemplateId };
+type Props = {
+  data: SignatureData;
+  template: TemplateId;
+  onLoad: (template: TemplateId, data: SignatureData) => void;
+};
 
-export default function ExportPane({ data, template }: Props) {
+export default function ExportPane({ data, template, onLoad }: Props) {
   const [tab, setTab] = useState<Tab>('install');
   const html = useMemo(() => renderTemplate(template, data), [template, data]);
   const plain = useMemo(() => buildPlainText(data), [data]);
@@ -51,35 +56,6 @@ export default function ExportPane({ data, template }: Props) {
 
   const downloadVcf = () => {
     download(`${(data.fullName || 'contact').replace(/\s+/g, '_')}.vcf`, buildVCard(data), 'text/vcard');
-  };
-
-  const [shareUrl, setShareUrl] = useState('');
-  const [sharing, setSharing] = useState(false);
-  const share = async () => {
-    setSharing(true);
-    setShareUrl('');
-    try {
-      const res = await fetch('/api/signatures', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          name: data.fullName || 'Untitled signature',
-          template,
-          data,
-        }),
-      });
-      const json = await res.json();
-      if (!res.ok) {
-        toast(json.error ?? 'Could not save');
-        return;
-      }
-      const url = `${window.location.origin}/s/${json.slug}`;
-      setShareUrl(url);
-      await navigator.clipboard.writeText(url).catch(() => {});
-      toast('Share link copied');
-    } finally {
-      setSharing(false);
-    }
   };
 
   return (
@@ -127,23 +103,8 @@ export default function ExportPane({ data, template }: Props) {
             <pre className="text-xs bg-bg-elev border border-border rounded-md p-3 overflow-x-auto leading-relaxed font-mono whitespace-pre-wrap">{plain}</pre>
           </div>
         )}
-        {tab === 'share' && (
-          <div className="space-y-3">
-            <p className="text-sm text-text-muted">Save the current signature to a link your colleagues can open and copy from — no account needed.</p>
-            <button onClick={share} disabled={sharing} className="btn-primary text-sm">
-              {sharing ? 'Saving…' : 'Create shareable link'}
-            </button>
-            {shareUrl && (
-              <div className="flex items-center gap-2">
-                <input className="input-sm flex-1 font-mono" readOnly value={shareUrl} />
-                <a href={shareUrl} target="_blank" rel="noopener" className="btn-ghost text-xs">Open</a>
-              </div>
-            )}
-            <p className="text-xs text-text-dim leading-relaxed">
-              Anyone with the link can view this signature, including the email, phone, and any other
-              details you’ve filled in. Don’t share publicly if it contains private contact info.
-            </p>
-          </div>
+        {tab === 'saves' && (
+          <SavesPane data={data} template={template} onLoad={onLoad} notify={toast} />
         )}
       </div>
     </div>

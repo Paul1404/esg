@@ -82,6 +82,11 @@ export default function EditorClient() {
     setTemplate('modern');
   };
 
+  const loadSaved = (tpl: TemplateId, next: SignatureData) => {
+    setTemplate(tpl);
+    setData({ ...DEFAULT_SIGNATURE, ...next });
+  };
+
   const formProps = useMemo(() => ({ data, update }), [data]);
 
   const activeTemplate = TEMPLATE_LIST.find((t) => t.id === template);
@@ -169,7 +174,7 @@ export default function EditorClient() {
 
         <main className="overflow-y-auto bg-bg p-5 space-y-5">
           <PreviewPane data={data} template={template} />
-          <ExportPane data={data} template={template} />
+          <ExportPane data={data} template={template} onLoad={loadSaved} />
         </main>
       </div>
     </div>

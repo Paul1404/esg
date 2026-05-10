@@ -34,6 +34,7 @@ export type SignatureData = {
   // Visuals
   photoUrl?: string;
   logoUrl?: string;
+  logoScale?: number;
   bannerUrl?: string;
   bannerLink?: string;
 
@@ -96,6 +97,7 @@ export const DEFAULT_SIGNATURE: SignatureData = {
   address: '500 Mission St, San Francisco, CA',
   photoUrl: '',
   logoUrl: '',
+  logoScale: 1,
   bannerUrl: '',
   bannerLink: '',
   socials: [

@@ -31,6 +31,8 @@ export function renderModern(d: SignatureData): string {
 
   const credentialSuffix = d.credentials ? `, ${esc(d.credentials)}` : '';
   const pronouns = d.showPronouns && d.pronouns ? ` <span style="color:${muted};font-weight:400;font-size:${baseSize - 2}px;">(${esc(d.pronouns)})</span>` : '';
+  const logoScale = d.logoScale ?? 1;
+  const logoSize = Math.round(18 * logoScale);
 
   const cta = d.ctaText && d.ctaUrl
     ? `<tr><td style="padding:14px 0 0 0;">${renderButton({ text: d.ctaText, href: d.ctaUrl, bg: accent, fg: '#ffffff', fontFamily, fontSize: baseSize - 1 })}</td></tr>`
@@ -59,7 +61,7 @@ export function renderModern(d: SignatureData): string {
         ${esc(d.jobTitle)}${d.department ? ` · ${esc(d.department)}` : ''}
       </div>
       <div style="font-family:${fontFamily};font-size:${baseSize}px;color:${text};font-weight:600;line-height:1.4;padding-top:2px;">
-        ${d.logoUrl ? img({ src: d.logoUrl, alt: d.company, width: 18, height: 18, style: 'display:inline-block;vertical-align:middle;margin-right:6px;' }) : ''}${esc(d.company)}
+        ${d.logoUrl ? img({ src: d.logoUrl, alt: d.company, width: logoSize, height: logoSize, style: 'display:inline-block;vertical-align:middle;margin-right:6px;' }) : ''}${esc(d.company)}
       </div>
       <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-top:10px;">
         ${contactRows}
