@@ -14,6 +14,18 @@ html, body {
 
 * { box-sizing: border-box; }
 
+/* Visible focus ring for keyboard users; suppressed for mouse clicks. */
+:focus-visible {
+  outline: 2px solid #7c5cff;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: rgba(124, 92, 255, 0.35);
+  color: #ffffff;
+}
+
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #262a35; border-radius: 6px; }
@@ -33,10 +45,10 @@ html, body {
     @apply inline-flex items-center justify-center gap-1.5 rounded-md text-sm font-medium px-3 py-2 transition disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-md text-sm font-medium px-3 py-2 transition disabled:opacity-50 disabled:cursor-not-allowed bg-accent text-white hover:bg-accent-hover;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-md text-sm font-medium px-3 py-2 transition disabled:opacity-50 disabled:cursor-not-allowed bg-accent text-white hover:bg-accent-hover active:translate-y-px shadow-soft;
   }
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-md text-sm font-medium px-3 py-2 transition disabled:opacity-50 disabled:cursor-not-allowed bg-bg-elev text-text border border-border hover:border-border-strong;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-md text-sm font-medium px-3 py-2 transition disabled:opacity-50 disabled:cursor-not-allowed bg-bg-elev text-text border border-border hover:border-border-strong hover:bg-bg-card;
   }
   .btn-soft {
     @apply inline-flex items-center justify-center gap-1.5 rounded-md text-sm font-medium px-3 py-2 transition disabled:opacity-50 disabled:cursor-not-allowed bg-accent-soft text-accent hover:bg-accent/20;
@@ -44,12 +56,37 @@ html, body {
   .card {
     @apply bg-bg-card border border-border rounded-lg;
   }
+  .card-hover {
+    @apply bg-bg-card border border-border rounded-lg transition hover:border-border-strong hover:-translate-y-0.5 hover:shadow-soft;
+  }
   .section-title {
     @apply text-xs font-semibold uppercase tracking-wider text-text-dim mb-3;
   }
   .pill {
     @apply inline-flex items-center gap-1 rounded-full bg-bg-elev border border-border px-2 py-0.5 text-xs text-text-muted;
   }
+  .pill-accent {
+    @apply inline-flex items-center gap-1 rounded-full bg-accent-soft border border-accent/30 px-2 py-0.5 text-xs text-accent;
+  }
+}
+
+/* Checkerboard backdrop for transparent image previews. */
+.checker {
+  background-color: #ffffff;
+  background-image:
+    linear-gradient(45deg, #e8eaef 25%, transparent 25%),
+    linear-gradient(-45deg, #e8eaef 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #e8eaef 75%),
+    linear-gradient(-45deg, transparent 75%, #e8eaef 75%);
+  background-size: 14px 14px;
+  background-position: 0 0, 0 7px, 7px -7px, -7px 0;
+}
+
+/* Soft radial halo behind the hero. */
+.hero-halo {
+  background:
+    radial-gradient(800px 360px at 50% -20%, rgba(124, 92, 255, 0.25), transparent 60%),
+    radial-gradient(420px 220px at 80% 0%, rgba(56, 189, 248, 0.10), transparent 60%);
 }
 
 /* Color picker swatch */
@@ -66,3 +103,47 @@ input[type='color'] {
 }
 input[type='color']::-webkit-color-swatch-wrapper { padding: 2px; }
 input[type='color']::-webkit-color-swatch { border: none; border-radius: 4px; }
+
+/* Range slider polish */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: #262a35;
+  border-radius: 999px;
+  outline: none;
+}
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: #7c5cff;
+  border-radius: 999px;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 4px rgba(124, 92, 255, 0.5);
+  transition: transform 120ms ease;
+}
+input[type='range']::-webkit-slider-thumb:hover { transform: scale(1.1); }
+input[type='range']::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #7c5cff;
+  border-radius: 999px;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+}
+
+/* Toast slide-in */
+@keyframes esg-toast-in {
+  from { opacity: 0; transform: translate(-50%, 8px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

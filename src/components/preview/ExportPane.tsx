@@ -266,12 +266,15 @@ function toast(msg: string) {
   if (!el) {
     el = document.createElement('div');
     el.id = 'esg-toast';
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
     el.style.cssText =
-      'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#161a23;border:1px solid #262a35;color:#e6e8ee;padding:10px 14px;border-radius:8px;font:500 13px Inter,system-ui,sans-serif;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.4);';
+      'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#161a23;border:1px solid #363b48;color:#e6e8ee;padding:10px 16px;border-radius:10px;font:500 13px var(--font-sans),Inter,system-ui,sans-serif;z-index:9999;box-shadow:0 10px 30px rgba(0,0,0,0.5),0 0 0 1px rgba(124,92,255,0.15);transition:opacity 200ms ease;pointer-events:none;';
     document.body.appendChild(el);
   }
   el.textContent = msg;
   el.style.opacity = '1';
+  el.style.animation = 'esg-toast-in 180ms ease-out';
   if (toastTimer) clearTimeout(toastTimer);
   toastTimer = setTimeout(() => {
     if (el) el.style.opacity = '0';
