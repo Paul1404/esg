@@ -2,7 +2,7 @@ import type { SignatureData, SocialPlatform } from './types';
 
 /**
  * Escape a string for safe inclusion in HTML text or attribute context.
- * Keep this conservative — email rendering engines are unforgiving.
+ * Keep this conservative. Email rendering engines are unforgiving.
  */
 export function esc(input: string | undefined | null): string {
   if (!input) return '';
@@ -38,7 +38,7 @@ export function safeUrl(url: string | undefined | null): string {
 
 /**
  * Normalize an <img src>. Schemeless domain URLs ("esg.example.net/foo.png")
- * would otherwise resolve relative to the host document — and in our preview
+ * would otherwise resolve relative to the host document, and in our preview
  * iframe that document is `about:blank`, so the image 404s. Force an https://
  * prefix in that case. Protocol-relative ("//host/path") and data: URIs pass
  * through unchanged.
@@ -77,7 +77,7 @@ export const SOCIAL_META: SocialIconSet = {
  * working even when image loading is blocked.
  *
  * However we ALSO offer a coloured icon row that uses well-known PNG
- * icon CDN endpoints (Cloudflare's icon CDN style) — we pre-bundle simple
+ * icon CDN endpoints (Cloudflare's icon CDN style). We pre-bundle simple
  * colored SVGs as images served from a tiny built-in API route to avoid
  * external dependencies.
  */
@@ -194,8 +194,8 @@ export function contactRowHtml(row: ContactRow, opts: { textColor: string; muted
 
 /**
  * Render a button using VML for Outlook desktop. This is the single
- * most common cross-client gotcha — without VML the rounded button
- * collapses in Outlook 2007–2019 on Windows.
+ * most common cross-client gotcha. Without VML the rounded button
+ * collapses in Outlook 2007 to 2019 on Windows.
  */
 export function renderButton(opts: {
   text: string;
@@ -228,7 +228,7 @@ export function wrapSignature(opts: { width: number; inner: string; fontFamily: 
   const { width, inner, fontFamily, fontSize } = opts;
   return `
 <!--[if gte mso 9]><xml><o:OfficeDocumentSettings><o:AllowPNG/><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml><![endif]-->
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="${width}" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;width:${width}px;max-width:100%;font-family:${fontFamily};font-size:${fontSize}px;color:#1f2330;-webkit-text-size-adjust:none;mso-line-height-rule:exactly;">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="${width}" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;width:${width}px;max-width:100%;font-family:${fontFamily};font-size:${fontSize}px;color:#2a3140;-webkit-text-size-adjust:none;mso-line-height-rule:exactly;">
   <tr>
     <td style="padding:0;">
 ${inner}
@@ -254,7 +254,7 @@ export function img(opts: { src: string; alt: string; width: number; height: num
  * for company logos where we don't know the source ratio (square shields,
  * wide wordmarks, etc.). Modern clients use the CSS max-width/max-height to
  * scale proportionally; Outlook desktop falls back to the attr dimensions and
- * may letterbox or stretch — that's the documented trade-off.
+ * may letterbox or stretch, which is the documented trade-off.
  */
 export function logoImg(opts: { src: string; alt: string; maxHeight: number; maxWidth: number; style?: string; display?: 'block' | 'inline-block' }): string {
   const { alt, maxHeight, maxWidth, display = 'block' } = opts;
@@ -264,11 +264,61 @@ export function logoImg(opts: { src: string; alt: string; maxHeight: number; max
 }
 
 /**
+ * Render the complimentary close line (e.g. "Best regards,") above a signature
+ * block. Empty input yields empty string. Returns a <tr><td> fragment when
+ * tableRow is true, otherwise a <div>.
+ */
+export function renderClose(opts: {
+  value: string | undefined;
+  textColor: string;
+  fontFamily: string;
+  fontSize: number;
+  tableRow?: boolean;
+  paddingBottom?: number;
+}): string {
+  const value = (opts.value ?? '').trim();
+  if (!value) return '';
+  const pad = opts.paddingBottom ?? 12;
+  const block = `<div style="font-family:${opts.fontFamily};font-size:${opts.fontSize}px;color:${opts.textColor};line-height:1.5;padding-bottom:${pad}px;">${escMultiline(value)}</div>`;
+  if (opts.tableRow) {
+    return `<tr><td style="padding:0;">${block}</td></tr>`;
+  }
+  return block;
+}
+
+/**
+ * Render the company legal block (VAT, USt-IdNr, Handelsregister, etc.) as a
+ * small muted multi-line block. Empty input yields empty string.
+ */
+export function renderCompanyLegal(opts: {
+  value: string | undefined;
+  mutedColor: string;
+  dividerColor: string;
+  fontFamily: string;
+  fontSize: number;
+  tableRow?: boolean;
+  withDivider?: boolean;
+}): string {
+  const value = (opts.value ?? '').trim();
+  if (!value) return '';
+  const border = opts.withDivider ? `border-top:1px solid ${opts.dividerColor};padding-top:10px;` : '';
+  const block = `<div style="font-family:${opts.fontFamily};font-size:${Math.max(10, opts.fontSize - 3)}px;color:${opts.mutedColor};line-height:1.5;${border}">${escMultiline(value)}</div>`;
+  if (opts.tableRow) {
+    return `<tr><td style="padding-top:10px;">${block}</td></tr>`;
+  }
+  return block;
+}
+
+/**
  * Build a plain-text fallback signature for clients that strip HTML
  * (or for users to paste into terminals/Slack).
  */
 export function buildPlainText(d: SignatureData): string {
   const lines: string[] = [];
+  if (d.complimentaryClose) {
+    lines.push(d.complimentaryClose);
+    lines.push('');
+  }
   const titleLine = [d.fullName, d.credentials].filter(Boolean).join(', ');
   lines.push(titleLine);
   const role = [d.jobTitle, d.department].filter(Boolean).join(' · ');
@@ -285,6 +335,10 @@ export function buildPlainText(d: SignatureData): string {
     d.socials.filter((s) => s.url).forEach((s) => {
       lines.push(`${SOCIAL_META[s.platform].label}: ${s.url}`);
     });
+  }
+  if (d.companyLegal) {
+    lines.push('');
+    lines.push(d.companyLegal);
   }
   if (d.disclaimer) {
     lines.push('');
@@ -316,6 +370,7 @@ export function buildVCard(d: SignatureData): string {
     ...d.socials
       .filter((s) => s.url)
       .map((s) => `URL;TYPE=${s.platform.toUpperCase()}:${s.url}`),
+    d.companyLegal ? `NOTE:${d.companyLegal.replace(/\r?\n/g, '\\n')}` : '',
     'END:VCARD',
   ].filter(Boolean);
   return lines.join('\r\n') + '\r\n';

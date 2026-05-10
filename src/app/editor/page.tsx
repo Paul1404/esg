@@ -4,7 +4,10 @@ import EditorClient from '@/components/editor/EditorClient';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Editor',
+  title: 'Email Signature Editor',
+  description:
+    'Build a professional HTML email signature in your browser. Pick a template, customize colors and fonts, then copy or download.',
+  alternates: { canonical: '/editor' },
 };
 
 function EditorSkeleton() {

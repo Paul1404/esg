@@ -91,7 +91,7 @@ export default function SavesPane({ data, template, onLoad, notify }: Props) {
 
   const exportAll = () => {
     if (saves.length === 0) {
-      notify('Nothing to export yet — save something first');
+      notify('Nothing to export yet. Save something first.');
       return;
     }
     const payload = JSON.stringify(buildExportFile(saves), null, 2);
@@ -127,7 +127,7 @@ export default function SavesPane({ data, template, onLoad, notify }: Props) {
             <p className="text-xs text-text-dim">Stored privately in this browser. Nothing leaves your machine.</p>
           </div>
           <span className="text-xs text-text-dim shrink-0">
-            {hydrated ? `${saves.length} / ${MAX_SAVES}` : '—'}
+            {hydrated ? `${saves.length} / ${MAX_SAVES}` : '...'}
           </span>
         </header>
 
@@ -350,7 +350,7 @@ function RecoveryCodeBlock({
         <h4 className="text-sm font-semibold">Recovery code (cross-device)</h4>
         <p className="text-xs text-text-dim">
           Mint a short code that loads this signature back from any browser. Treat it like a
-          password — anyone with the code can view the saved data.
+          password. Anyone with the code can view the saved data.
         </p>
       </header>
 

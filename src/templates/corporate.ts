@@ -6,6 +6,8 @@ import {
   escMultiline,
   img,
   logoImg,
+  renderClose,
+  renderCompanyLegal,
   renderSocialRow,
   safeUrl,
   wrapSignature,
@@ -22,8 +24,12 @@ export function renderCorporate(d: SignatureData): string {
   const logoMaxH = Math.round(48 * logoScale);
   const logoMaxW = Math.round(220 * logoScale);
 
+  const close = renderClose({ value: d.complimentaryClose, textColor: text, fontFamily, fontSize: baseSize, tableRow: true });
+  const legal = renderCompanyLegal({ value: d.companyLegal, mutedColor: muted, dividerColor: divider, fontFamily, fontSize: baseSize, tableRow: true, withDivider: true });
+
   const inner = `
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
+  ${close}
   ${d.logoUrl ? `<tr><td style="padding-bottom:12px;">${logoImg({ src: d.logoUrl, alt: d.company, maxHeight: logoMaxH, maxWidth: logoMaxW })}</td></tr>` : ''}
   <tr><td style="font-family:${fontFamily};font-size:${baseSize + 4}px;font-weight:700;color:${text};line-height:1.2;">${esc(d.fullName)}${credentialSuffix}</td></tr>
   <tr><td style="font-family:${fontFamily};font-size:${baseSize}px;color:${accent};line-height:1.4;font-weight:600;padding-top:2px;">${esc(d.jobTitle)}${d.department ? ` &nbsp;|&nbsp; ${esc(d.department)}` : ''}</td></tr>
@@ -40,6 +46,7 @@ export function renderCorporate(d: SignatureData): string {
       ? `<a href="${safeUrl(d.bannerLink)}" target="_blank" rel="noopener" style="text-decoration:none;">${img({ src: d.bannerUrl, alt: 'Banner', width: d.layoutWidth, height: Math.round(d.layoutWidth * 0.2), style: 'max-width:100%;' })}</a>`
       : img({ src: d.bannerUrl, alt: 'Banner', width: d.layoutWidth, height: Math.round(d.layoutWidth * 0.2), style: 'max-width:100%;' })
   }</td></tr>` : ''}
+  ${legal}
   ${d.disclaimer ? `<tr><td style="padding-top:14px;border-top:1px solid ${divider};"><div style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.5;padding-top:10px;">${escMultiline(d.disclaimer)}</div></td></tr>` : ''}
 </table>`;
 

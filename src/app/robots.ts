@@ -1,16 +1,33 @@
 import type { MetadataRoute } from 'next';
 
+function siteUrl(): string {
+  const raw = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (!raw) return 'http://localhost:3000';
+  const stripped = raw.replace(/\/$/, '');
+  if (/^https?:\/\//i.test(stripped)) return stripped;
+  if (stripped.startsWith('//')) return `https:${stripped}`;
+  return `https://${stripped}`;
+}
+
 export default function robots(): MetadataRoute.Robots {
+  const host = siteUrl();
   return {
     rules: [
       {
         userAgent: '*',
         allow: ['/', '/editor'],
-        // Shared signatures contain personal contact info, and proxied
-        // image keys are unguessable per-asset URLs — neither belongs in
-        // search indexes.
         disallow: ['/s/', '/i/', '/api/'],
       },
+      {
+        userAgent: ['GPTBot', 'CCBot', 'ClaudeBot', 'anthropic-ai', 'Google-Extended', 'PerplexityBot', 'Bytespider'],
+        disallow: ['/'],
+      },
+      {
+        userAgent: ['SemrushBot', 'AhrefsBot', 'MJ12bot', 'DotBot', 'PetalBot'],
+        disallow: ['/'],
+      },
     ],
+    sitemap: `${host}/sitemap.xml`,
+    host,
   };
 }

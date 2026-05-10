@@ -9,11 +9,11 @@ export default function NotFound() {
         </div>
         <h1 className="mt-6 text-2xl font-semibold tracking-tight">Nothing here</h1>
         <p className="mt-2 text-sm text-text-muted leading-relaxed">
-          The page or signature you’re looking for doesn’t exist — or it may have been removed.
+          The page or signature you are looking for does not exist, or it may have been removed.
         </p>
         <div className="mt-6 flex items-center justify-center gap-2">
           <Link href="/" className="btn-ghost text-sm">Home</Link>
-          <Link href="/editor" className="btn-primary text-sm">Open editor →</Link>
+          <Link href="/editor" className="btn-primary text-sm">Open editor</Link>
         </div>
       </div>
     </main>

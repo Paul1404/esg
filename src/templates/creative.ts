@@ -6,6 +6,8 @@ import {
   escMultiline,
   img,
   renderButton,
+  renderClose,
+  renderCompanyLegal,
   renderSocialRow,
   wrapSignature,
 } from '@/lib/template-helpers';
@@ -22,7 +24,11 @@ export function renderCreative(d: SignatureData): string {
     ? `<tr><td style="padding-top:14px;">${renderButton({ text: d.ctaText, href: d.ctaUrl, bg: '#ffffff', fg: accent, fontFamily, fontSize: baseSize - 1 })}</td></tr>`
     : '';
 
+  const close = renderClose({ value: d.complimentaryClose, textColor: text, fontFamily, fontSize: baseSize });
+  const legal = renderCompanyLegal({ value: d.companyLegal, mutedColor: muted, dividerColor: d.dividerColor, fontFamily, fontSize: baseSize });
+
   const inner = `
+${close}
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
   <tr>
     <td bgcolor="${accent}" style="background-color:${accent};padding:18px 22px;border-radius:10px 10px 0 0;">
@@ -45,6 +51,7 @@ export function renderCreative(d: SignatureData): string {
       </table>
       ${d.quote ? `<div style="font-family:${fontFamily};font-style:italic;color:${muted};font-size:${baseSize - 1}px;line-height:1.5;padding-top:12px;border-top:1px dashed ${d.dividerColor};margin-top:12px;">“${esc(d.quote)}”</div>` : ''}
       ${cta ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0">${cta}</table>` : ''}
+      ${d.companyLegal ? `<div style="padding-top:12px;">${legal}</div>` : ''}
       ${d.disclaimer ? `<div style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.5;padding-top:12px;">${escMultiline(d.disclaimer)}</div>` : ''}
     </td>
   </tr>

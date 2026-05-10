@@ -1,8 +1,8 @@
 import type { SignatureData } from '@/lib/types';
-import { esc, escMultiline, safeUrl, wrapSignature } from '@/lib/template-helpers';
+import { esc, escMultiline, renderClose, renderCompanyLegal, safeUrl, wrapSignature } from '@/lib/template-helpers';
 
 export function renderCompact(d: SignatureData): string {
-  const { fontFamily, fontSize: baseSize, primaryColor: accent, textColor: text, mutedColor: muted } = d;
+  const { fontFamily, fontSize: baseSize, primaryColor: accent, textColor: text, mutedColor: muted, dividerColor: divider } = d;
   const credentialSuffix = d.credentials ? `, ${esc(d.credentials)}` : '';
 
   const contact: string[] = [];
@@ -10,12 +10,17 @@ export function renderCompact(d: SignatureData): string {
   if (d.phone) contact.push(`<span style="color:${muted};">${esc(d.phone)}</span>`);
   if (d.website) contact.push(`<a href="${safeUrl(d.website)}" style="color:${accent};text-decoration:none;">${esc(d.website.replace(/^https?:\/\//, ''))}</a>`);
 
+  const close = renderClose({ value: d.complimentaryClose, textColor: text, fontFamily, fontSize: baseSize, tableRow: true, paddingBottom: 6 });
+  const legal = renderCompanyLegal({ value: d.companyLegal, mutedColor: muted, dividerColor: divider, fontFamily, fontSize: baseSize, tableRow: true });
+
   const inner = `
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
+  ${close}
   <tr><td style="font-family:${fontFamily};font-size:${baseSize}px;color:${text};line-height:1.5;">
-    <strong style="color:${text};">${esc(d.fullName)}${credentialSuffix}</strong> <span style="color:${muted};">— ${esc(d.jobTitle)}${d.company ? `, ${esc(d.company)}` : ''}</span>
+    <strong style="color:${text};">${esc(d.fullName)}${credentialSuffix}</strong> <span style="color:${muted};">&middot; ${esc(d.jobTitle)}${d.company ? `, ${esc(d.company)}` : ''}</span>
   </td></tr>
   <tr><td style="font-family:${fontFamily};font-size:${baseSize - 1}px;color:${muted};line-height:1.5;">${contact.join(' &nbsp;·&nbsp; ')}</td></tr>
+  ${legal}
   ${d.disclaimer ? `<tr><td style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.4;padding-top:6px;">${escMultiline(d.disclaimer)}</td></tr>` : ''}
 </table>`;
 

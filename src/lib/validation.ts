@@ -15,6 +15,7 @@ export const SignatureSchema = z.object({
   company: z.string().max(160).default(''),
   pronouns: z.string().max(40).optional().default(''),
   credentials: z.string().max(40).optional().default(''),
+  companyLegal: z.string().max(600).optional().default(''),
 
   email: z.string().max(200).default(''),
   phone: z.string().max(60).optional().default(''),
@@ -43,6 +44,7 @@ export const SignatureSchema = z.object({
   ctaUrl: z.string().max(500).optional().default(''),
   quote: z.string().max(280).optional().default(''),
   disclaimer: z.string().max(2000).optional().default(''),
+  complimentaryClose: z.string().max(80).optional().default(''),
   showPronouns: z.boolean().optional().default(true),
 });
 

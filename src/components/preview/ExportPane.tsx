@@ -32,7 +32,7 @@ export default function ExportPane({ data, template, onLoad }: Props) {
     if (typeof window !== 'undefined' && 'ClipboardItem' in window) {
       try {
         await navigator.clipboard.write([new ClipboardItem({ 'text/html': blob, 'text/plain': plainBlob })]);
-        toast('Signature copied as rich text — paste into Gmail/Outlook compose');
+        toast('Signature copied as rich text. Paste into Gmail or Outlook compose.');
         return;
       } catch { /* fall through */ }
     }

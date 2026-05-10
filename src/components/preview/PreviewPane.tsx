@@ -101,21 +101,21 @@ function buildPreviewDocument(signatureHtml: string, mode: ClientMode): string {
   const fakeQuote = (() => {
     if (mode === 'outlook') {
       return `<div style="font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#201f1e;">
-        Hi team,<br/><br/>Quick note before EOD — sharing the v3 mocks.<br/><br/>Thanks,<br/></div>`;
+        Hi team,<br/><br/>Quick note before EOD: sharing the v3 mocks.<br/><br/>Thanks,<br/></div>`;
     }
     if (mode === 'apple-mail') {
       return `<div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',Helvetica,Arial,sans-serif;font-size:14px;color:#1d1d1f;">
-        Hi team,<br/><br/>Quick note before EOD — sharing the v3 mocks.<br/><br/>Thanks,<br/></div>`;
+        Hi team,<br/><br/>Quick note before EOD: sharing the v3 mocks.<br/><br/>Thanks,<br/></div>`;
     }
     if (mode === 'mobile') {
       return `<div style="font-family:-apple-system,system-ui,sans-serif;font-size:15px;color:#202124;">
-        Hi team,<br/><br/>Quick note before EOD.<br/><br/>—<br/></div>`;
+        Hi team,<br/><br/>Quick note before EOD.<br/><br/>Thanks,<br/></div>`;
     }
     return `<div style="font-family:Arial,sans-serif;font-size:14px;color:${wrapperColor};">
-      Hi team,<br/><br/>Quick note before EOD — sharing the v3 mocks.<br/><br/>Thanks,<br/></div>`;
+      Hi team,<br/><br/>Quick note before EOD: sharing the v3 mocks.<br/><br/>Thanks,<br/></div>`;
   })();
 
-  // Outlook simulation: forces tables to behave like Word — clip at 600px,
+  // Outlook simulation: forces tables to behave like Word. Clip at 600px,
   // reset margins, ignore many CSS features. This is approximate; the only
   // ground-truth is sending a real test email.
   const outlookSim =

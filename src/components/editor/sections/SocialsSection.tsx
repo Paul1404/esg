@@ -52,8 +52,8 @@ export default function SocialsSection({ data, onAdd, onUpdate, onRemove }: Prop
         ))}
       </div>
       <p className="text-xs text-text-dim leading-relaxed">
-        Icons render as colored circles with letterforms — they survive image-blocking clients
-        because they&apos;re not images.
+        Icons render as colored circles with letterforms. They survive image-blocking clients
+        because they are not images.
       </p>
     </div>
   );

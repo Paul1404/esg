@@ -23,6 +23,7 @@ export type SignatureData = {
   company: string;
   pronouns?: string;
   credentials?: string;
+  companyLegal?: string;
 
   // Contact
   email: string;
@@ -60,9 +61,32 @@ export type SignatureData = {
   // Disclaimer
   disclaimer?: string;
 
+  // Complimentary close (e.g. "Best regards,")
+  complimentaryClose?: string;
+
   // Misc
   showPronouns?: boolean;
 };
+
+export const COMPLIMENTARY_CLOSE_PRESETS: { label: string; value: string }[] = [
+  { label: 'None', value: '' },
+  { label: 'Best regards,', value: 'Best regards,' },
+  { label: 'Kind regards,', value: 'Kind regards,' },
+  { label: 'Warm regards,', value: 'Warm regards,' },
+  { label: 'Sincerely,', value: 'Sincerely,' },
+  { label: 'Thanks,', value: 'Thanks,' },
+  { label: 'Thank you,', value: 'Thank you,' },
+  { label: 'Cheers,', value: 'Cheers,' },
+  { label: 'All the best,', value: 'All the best,' },
+  { label: 'Talk soon,', value: 'Talk soon,' },
+  { label: 'Mit freundlichen Grüßen,', value: 'Mit freundlichen Grüßen,' },
+  { label: 'Viele Grüße,', value: 'Viele Grüße,' },
+  { label: 'Beste Grüße,', value: 'Beste Grüße,' },
+  { label: 'Herzliche Grüße,', value: 'Herzliche Grüße,' },
+  { label: 'Cordialement,', value: 'Cordialement,' },
+  { label: 'Bien à vous,', value: 'Bien à vous,' },
+  { label: 'Saludos cordiales,', value: 'Saludos cordiales,' },
+];
 
 export type TemplateId =
   | 'classic'
@@ -93,6 +117,7 @@ export const DEFAULT_SIGNATURE: SignatureData = {
   company: 'Northwind Labs',
   pronouns: 'they/them',
   credentials: '',
+  companyLegal: '',
   email: 'jamie@northwind.example',
   phone: '+1 (555) 010-2233',
   mobile: '',
@@ -108,10 +133,10 @@ export const DEFAULT_SIGNATURE: SignatureData = {
     { platform: 'twitter', url: 'https://twitter.com/jamie' },
     { platform: 'github', url: 'https://github.com/jamie' },
   ],
-  primaryColor: '#7c5cff',
-  textColor: '#1f2330',
-  mutedColor: '#6b7385',
-  dividerColor: '#e2e5ec',
+  primaryColor: '#6e54e0',
+  textColor: '#2a3140',
+  mutedColor: '#6b7280',
+  dividerColor: '#e5e7eb',
   fontFamily: DEFAULT_FONT,
   fontSize: 14,
   layoutWidth: 520,
@@ -119,6 +144,7 @@ export const DEFAULT_SIGNATURE: SignatureData = {
   ctaUrl: 'https://cal.com/jamie',
   quote: 'Make it useful. Make it kind.',
   disclaimer: '',
+  complimentaryClose: '',
   showPronouns: true,
 };
 

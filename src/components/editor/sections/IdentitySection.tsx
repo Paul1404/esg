@@ -41,6 +41,17 @@ export default function IdentitySection({ data, update }: Props) {
           <input className="input" value={data.department ?? ''} onChange={(e) => update('department', e.target.value)} placeholder="Design" />
         </Field>
       </div>
+      <Field
+        label="Company info"
+        hint="VAT / USt-IdNr. / Handelsregister / Registered office. Rendered small below the signature."
+      >
+        <textarea
+          className="input min-h-[88px] resize-y font-mono text-xs"
+          value={data.companyLegal ?? ''}
+          onChange={(e) => update('companyLegal', e.target.value)}
+          placeholder={'Northwind Labs GmbH, Musterstraße 1, 10115 Berlin\nUSt-IdNr.: DE123456789\nHandelsregister: HRB 12345 (Berlin Charlottenburg)\nGeschäftsführer: Jamie Rivers'}
+        />
+      </Field>
     </div>
   );
 }
