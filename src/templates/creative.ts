@@ -3,6 +3,7 @@ import {
   buildContactRows,
   contactRowHtml,
   esc,
+  escMultiline,
   img,
   renderButton,
   renderSocialRow,
@@ -44,7 +45,7 @@ export function renderCreative(d: SignatureData): string {
       </table>
       ${d.quote ? `<div style="font-family:${fontFamily};font-style:italic;color:${muted};font-size:${baseSize - 1}px;line-height:1.5;padding-top:12px;border-top:1px dashed ${d.dividerColor};margin-top:12px;">“${esc(d.quote)}”</div>` : ''}
       ${cta ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0">${cta}</table>` : ''}
-      ${d.disclaimer ? `<div style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.5;padding-top:12px;">${esc(d.disclaimer)}</div>` : ''}
+      ${d.disclaimer ? `<div style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.5;padding-top:12px;">${escMultiline(d.disclaimer)}</div>` : ''}
     </td>
   </tr>
 </table>`;

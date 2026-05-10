@@ -27,20 +27,6 @@ export function s3(): S3Client {
   return _client;
 }
 
-/**
- * Direct public URL for an object — only returned when the operator has
- * explicitly opted in via S3_PUBLIC_BASE_URL. Many S3-compatible providers
- * (Tigris, R2, S3 with Block Public Access) ignore object-level ACLs, so
- * "construct {endpoint}/{bucket}/{key} and hope" produces broken images.
- * When this returns null, callers should serve the asset through the
- * /i/[...key] proxy instead.
- */
-export function publicUrlForKey(key: string): string | null {
-  const base = process.env.S3_PUBLIC_BASE_URL?.replace(/\/$/, '');
-  if (!base) return null;
-  return `${base}/${key}`;
-}
-
 export async function uploadObject(params: {
   key: string;
   body: Buffer | Uint8Array;

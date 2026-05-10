@@ -1,5 +1,5 @@
 import type { SignatureData } from '@/lib/types';
-import { esc, safeUrl, wrapSignature } from '@/lib/template-helpers';
+import { esc, escMultiline, safeUrl, wrapSignature } from '@/lib/template-helpers';
 
 export function renderMinimal(d: SignatureData): string {
   const { fontFamily, fontSize: baseSize, primaryColor: accent, textColor: text, mutedColor: muted, dividerColor: divider } = d;
@@ -16,7 +16,7 @@ export function renderMinimal(d: SignatureData): string {
   <tr><td style="font-family:${fontFamily};font-size:${baseSize}px;color:${muted};line-height:1.5;">${esc(d.jobTitle)}${d.company ? ` · ${esc(d.company)}` : ''}</td></tr>
   <tr><td style="padding-top:6px;border-top:1px solid ${divider};margin-top:6px;"></td></tr>
   <tr><td style="font-family:${fontFamily};font-size:${baseSize}px;color:${muted};line-height:1.6;padding-top:6px;">${contactPieces.join(' &nbsp;·&nbsp; ')}</td></tr>
-  ${d.disclaimer ? `<tr><td style="padding-top:10px;font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.5;">${esc(d.disclaimer)}</td></tr>` : ''}
+  ${d.disclaimer ? `<tr><td style="padding-top:10px;font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.5;">${escMultiline(d.disclaimer)}</td></tr>` : ''}
 </table>`;
 
   return wrapSignature({ width: d.layoutWidth, inner, fontFamily, fontSize: baseSize });

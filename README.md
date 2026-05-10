@@ -63,9 +63,8 @@ npm run dev
    - `AWS_ACCESS_KEY_ID = ${{<bucket>.ACCESS_KEY_ID}}`
    - `AWS_SECRET_ACCESS_KEY = ${{<bucket>.SECRET_ACCESS_KEY}}`
 5. Postgres is wired automatically via `${{Postgres.DATABASE_URL}}`. Confirm `DATABASE_URL` is bound to your service.
-6. Optional: set `S3_PUBLIC_BASE_URL` if your bucket has a CDN-style public hostname.
-7. Deploy. The container's entrypoint runs `prisma db push` on startup so the schema is created without you needing a separate migration step.
-8. Health check: `GET /api/health`.
+6. Deploy. The container's entrypoint runs `prisma db push` on startup so the schema is created without you needing a separate migration step.
+7. Health check: `GET /api/health`.
 
 The included `railway.toml` declares the Dockerfile builder and a healthcheck path. No further configuration is needed.
 
@@ -79,7 +78,6 @@ The included `railway.toml` declares the Dockerfile builder and a healthcheck pa
 | `AWS_DEFAULT_REGION` | for image uploads | Defaults to `auto` |
 | `AWS_ACCESS_KEY_ID` | for image uploads | |
 | `AWS_SECRET_ACCESS_KEY` | for image uploads | |
-| `S3_PUBLIC_BASE_URL` | optional | Public CDN/bucket base URL. If unset, uploads are served through the in-app `/i/<key>` proxy so private buckets work without object-level public-read ACLs. |
 | `NEXT_PUBLIC_APP_URL` | optional | Public app URL used for share links; falls back to request origin |
 | `PORT` | optional | Defaults to `3000` |
 
@@ -89,7 +87,7 @@ The app degrades gracefully: image uploads return 503 if S3 isn't configured, an
 
 A few things to know if you're exposing this to the open internet:
 
-- **Image proxy.** When `S3_PUBLIC_BASE_URL` is unset, uploaded images are served through `/i/<key>` using the app's S3 credentials. The bucket can stay private and you don't have to fight with object-level ACLs, but image traffic flows through your app's egress on every email open. Point `S3_PUBLIC_BASE_URL` at a public bucket or a CDN to opt out.
+- **Image proxy.** Uploaded images are served through `/i/<key>` using the app's S3 credentials. The bucket can stay private and you don't have to fight with object-level ACLs that most S3-compatible providers silently ignore. Image traffic flows through your app's egress on every email open; if that becomes a concern, put a CDN in front of `/i/` rather than trying to expose the bucket directly.
 - **Rate limits.** Per-IP best-effort limits are applied to `/api/upload` (20/hour) and `/api/signatures` (10/hour). State is in-memory, so it resets on restart and isn't shared between replicas — fine for a single instance, swap for an external store if you scale out.
 - **Search indexing.** `/s/` (shared signatures) and `/i/` (proxied images) are blocked via `robots.txt` and shared signature pages set `<meta name="robots" content="noindex">`. Anything containing personal contact info stays out of search results.
 - **Sharing is public.** Anyone with a `/s/<slug>` link can view the signature, including any contact details it contains. The slugs are unguessable but the page warns the user before they share.

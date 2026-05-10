@@ -14,6 +14,17 @@ export function esc(input: string | undefined | null): string {
     .replace(/'/g, '&#39;');
 }
 
+/**
+ * Like esc(), but preserves user-entered line breaks by converting them to
+ * <br>. Use for free-form multi-line fields (disclaimer, etc.) where the
+ * surrounding container is a block element. Outlook ignores the CSS
+ * `white-space: pre-line` workaround, so <br> is the only reliable option.
+ */
+export function escMultiline(input: string | undefined | null): string {
+  if (!input) return '';
+  return esc(String(input).replace(/\r\n?/g, '\n')).replace(/\n/g, '<br />');
+}
+
 /** Strip dangerous protocols from URLs while keeping http(s), mailto, tel. */
 export function safeUrl(url: string | undefined | null): string {
   if (!url) return '';

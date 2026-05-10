@@ -3,6 +3,7 @@ import {
   buildContactRows,
   contactRowHtml,
   esc,
+  escMultiline,
   img,
   renderSocialRow,
   safeUrl,
@@ -35,7 +36,7 @@ export function renderCorporate(d: SignatureData): string {
       ? `<a href="${safeUrl(d.bannerLink)}" target="_blank" rel="noopener" style="text-decoration:none;">${img({ src: d.bannerUrl, alt: 'Banner', width: d.layoutWidth, height: Math.round(d.layoutWidth * 0.2), style: 'max-width:100%;' })}</a>`
       : img({ src: d.bannerUrl, alt: 'Banner', width: d.layoutWidth, height: Math.round(d.layoutWidth * 0.2), style: 'max-width:100%;' })
   }</td></tr>` : ''}
-  ${d.disclaimer ? `<tr><td style="padding-top:14px;border-top:1px solid ${divider};"><div style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.5;padding-top:10px;">${esc(d.disclaimer)}</div></td></tr>` : ''}
+  ${d.disclaimer ? `<tr><td style="padding-top:14px;border-top:1px solid ${divider};"><div style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.5;padding-top:10px;">${escMultiline(d.disclaimer)}</div></td></tr>` : ''}
 </table>`;
 
   return wrapSignature({ width: d.layoutWidth, inner, fontFamily, fontSize: baseSize });
