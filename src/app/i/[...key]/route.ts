@@ -17,7 +17,7 @@ type Ctx = { params: Promise<{ key: string[] }> };
 
 export async function GET(req: Request, ctx: Ctx) {
   if (!isS3Configured) {
-    return new NextResponse('Storage not configured', { status: 503 });
+    return new NextResponse('Image unavailable', { status: 503 });
   }
 
   const { key: parts } = await ctx.params;

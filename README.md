@@ -85,6 +85,15 @@ The included `railway.toml` declares the Dockerfile builder and a healthcheck pa
 
 The app degrades gracefully: image uploads return 503 if S3 isn't configured, and share links return 503 if Postgres isn't configured. The editor (with copy/download) works with neither.
 
+## Hosting publicly
+
+A few things to know if you're exposing this to the open internet:
+
+- **Image proxy.** When `S3_PUBLIC_BASE_URL` is unset, uploaded images are served through `/i/<key>` using the app's S3 credentials. The bucket can stay private and you don't have to fight with object-level ACLs, but image traffic flows through your app's egress on every email open. Point `S3_PUBLIC_BASE_URL` at a public bucket or a CDN to opt out.
+- **Rate limits.** Per-IP best-effort limits are applied to `/api/upload` (20/hour) and `/api/signatures` (10/hour). State is in-memory, so it resets on restart and isn't shared between replicas — fine for a single instance, swap for an external store if you scale out.
+- **Search indexing.** `/s/` (shared signatures) and `/i/` (proxied images) are blocked via `robots.txt` and shared signature pages set `<meta name="robots" content="noindex">`. Anything containing personal contact info stays out of search results.
+- **Sharing is public.** Anyone with a `/s/<slug>` link can view the signature, including any contact details it contains. The slugs are unguessable but the page warns the user before they share.
+
 ## Project layout
 
 ```

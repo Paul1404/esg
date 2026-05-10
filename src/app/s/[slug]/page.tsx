@@ -1,11 +1,18 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import { prisma } from '@/lib/db';
 import { renderTemplate } from '@/templates';
 import { SignatureSchema, TemplateIdSchema } from '@/lib/validation';
 import SharedActions from './SharedActions';
 
 export const dynamic = 'force-dynamic';
+
+// Shared signatures contain personal contact info — keep them out of search
+// engines even though the URLs are technically public.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false, nocache: true },
+};
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -20,8 +27,8 @@ export default async function SharedSignaturePage({ params }: Props) {
   } catch {
     return (
       <div className="p-10 max-w-xl mx-auto text-center">
-        <h1 className="text-xl font-semibold">Database not configured</h1>
-        <p className="text-text-muted mt-2 text-sm">Set DATABASE_URL on the server to enable shared signatures.</p>
+        <h1 className="text-xl font-semibold">Shared signatures are unavailable</h1>
+        <p className="text-text-muted mt-2 text-sm">Try again in a moment, or build a fresh one in the editor.</p>
         <Link href="/editor" className="btn-primary mt-6 inline-flex">Open editor</Link>
       </div>
     );

@@ -129,7 +129,7 @@ export default function ExportPane({ data, template }: Props) {
         )}
         {tab === 'share' && (
           <div className="space-y-3">
-            <p className="text-sm text-text-muted">Save the current signature to a public URL anyone can copy from.</p>
+            <p className="text-sm text-text-muted">Save the current signature to a link your colleagues can open and copy from — no account needed.</p>
             <button onClick={share} disabled={sharing} className="btn-primary text-sm">
               {sharing ? 'Saving…' : 'Create shareable link'}
             </button>
@@ -139,7 +139,10 @@ export default function ExportPane({ data, template }: Props) {
                 <a href={shareUrl} target="_blank" rel="noopener" className="btn-ghost text-xs">Open</a>
               </div>
             )}
-            <p className="text-xs text-text-dim">Requires <code>DATABASE_URL</code> to be set on the server.</p>
+            <p className="text-xs text-text-dim leading-relaxed">
+              Anyone with the link can view this signature, including the email, phone, and any other
+              details you’ve filled in. Don’t share publicly if it contains private contact info.
+            </p>
           </div>
         )}
       </div>

@@ -80,10 +80,16 @@ export default function ImagesSection({ data, update }: Props) {
       if (!res.ok || !json.url) {
         const fallback =
           res.status === 413
-            ? 'File too large for the server to accept'
-            : res.status === 503
-              ? 'Image storage is not configured on the server'
-              : `Upload failed (HTTP ${res.status})`;
+            ? 'That file is too large — try something under 8 MB'
+            : res.status === 415
+              ? 'That file type isn’t supported — use PNG, JPEG, WebP, or GIF'
+              : res.status === 422
+                ? 'We couldn’t process that image — try a different file'
+                : res.status === 429
+                  ? 'You’re uploading too quickly — wait a moment and try again'
+                  : res.status === 503
+                    ? 'Image uploads are unavailable right now'
+                    : 'Something went wrong while uploading';
         throw new Error(json.error ?? fallback);
       }
       if (slot === 'photo') update('photoUrl', json.url);

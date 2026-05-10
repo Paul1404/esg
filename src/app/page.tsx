@@ -12,7 +12,7 @@ const FEATURES: { title: string; body: string }[] = [
   },
   {
     title: 'Image hosting built in',
-    body: 'Upload photos, logos, and banners straight to S3-compatible storage. Public URLs are inlined as absolute https sources.',
+    body: 'Upload photos, logos, and banners; we re-encode them, strip EXIF, and serve them over a stable HTTPS URL ready to paste into any client.',
   },
   {
     title: 'Multiple export formats',
