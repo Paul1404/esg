@@ -3,12 +3,21 @@ import { customAlphabet } from 'nanoid';
 import { flattenError } from 'zod';
 import { prisma } from '@/lib/db';
 import { SaveSignaturePayload } from '@/lib/validation';
+import { clientKey, rateLimit } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 
 const slugId = customAlphabet('abcdefghijkmnopqrstuvwxyz23456789', 10);
 
 export async function POST(req: Request) {
+  const limit = rateLimit(`share:${clientKey(req)}`, { limit: 10, windowMs: 60 * 60 * 1000 });
+  if (!limit.ok) {
+    return NextResponse.json(
+      { error: 'You’re creating share links too quickly. Try again in a few minutes.' },
+      { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } },
+    );
+  }
+
   const body = await req.json().catch(() => null);
   const parsed = SaveSignaturePayload.safeParse(body);
   if (!parsed.success) {
@@ -27,7 +36,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ id: sig.id, slug: sig.slug });
   } catch {
     return NextResponse.json(
-      { error: 'Could not save (is DATABASE_URL set?)' },
+      { error: 'Sharing is unavailable right now.' },
       { status: 503 },
     );
   }

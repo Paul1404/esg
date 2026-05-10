@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
 import sharp from 'sharp';
-import { isS3Configured, uploadObject } from '@/lib/s3';
+import { isS3Configured, publicUrlForKey, uploadObject } from '@/lib/s3';
 import { prisma } from '@/lib/db';
+import { clientKey, rateLimit } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -13,10 +14,19 @@ const MAX_BYTES = 8 * 1024 * 1024;
 export async function POST(req: Request) {
   if (!isS3Configured) {
     return NextResponse.json(
-      { error: 'S3 is not configured. Set AWS_* env vars.' },
+      { error: 'Image uploads are unavailable right now.' },
       { status: 503 },
     );
   }
+
+  const limit = rateLimit(`upload:${clientKey(req)}`, { limit: 20, windowMs: 60 * 60 * 1000 });
+  if (!limit.ok) {
+    return NextResponse.json(
+      { error: 'You’re uploading too quickly. Try again in a few minutes.' },
+      { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } },
+    );
+  }
+
   const form = await req.formData().catch(() => null);
   if (!form) return NextResponse.json({ error: 'Invalid form data' }, { status: 400 });
 
@@ -67,7 +77,16 @@ export async function POST(req: Request) {
 
   const ext = outputType === 'image/jpeg' ? 'jpg' : 'png';
   const key = `signatures/${kind}/${new Date().toISOString().slice(0, 10)}/${nanoid(16)}.${ext}`;
-  const url = await uploadObject({ key, body: processed, contentType: outputType });
+  await uploadObject({ key, body: processed, contentType: outputType });
+
+  // Prefer S3_PUBLIC_BASE_URL (CDN / public bucket) when set. Otherwise serve
+  // through the /i proxy: most S3-compatible providers ignore object-level
+  // public-read ACLs, so direct {endpoint}/{bucket}/{key} URLs return 403
+  // when embedded in emails.
+  const direct = publicUrlForKey(key);
+  const appOrigin =
+    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ?? new URL(req.url).origin;
+  const url = direct ?? `${appOrigin}/i/${key}`;
 
   // Best-effort persistence; ignore failure so uploads still work without DB.
   try {
