@@ -16,7 +16,7 @@ export function renderHorizontal(d: SignatureData): string {
     ${d.photoUrl ? `<td valign="middle" width="56" style="width:56px;padding-right:12px;">${img({ src: d.photoUrl, alt: d.fullName, width: 48, height: 48, round: true })}</td>` : ''}
     <td valign="middle">
       <div style="font-family:${fontFamily};font-size:${baseSize + 1}px;font-weight:700;color:${text};line-height:1.3;">
-        ${esc(d.fullName)} <span style="color:${muted};font-weight:400;">— ${esc(d.jobTitle)}${d.company ? `, ${esc(d.company)}` : ''}</span>
+        ${esc(d.fullName)} <span style="color:${muted};font-weight:400;">&middot; ${esc(d.jobTitle)}${d.company ? `, ${esc(d.company)}` : ''}</span>
       </div>
       <div style="font-family:${fontFamily};font-size:${baseSize - 1}px;color:${muted};line-height:1.5;padding-top:3px;">
         ${contactPieces.join(' &nbsp;·&nbsp; ')}

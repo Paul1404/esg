@@ -2,7 +2,7 @@ import type { SignatureData, SocialPlatform } from './types';
 
 /**
  * Escape a string for safe inclusion in HTML text or attribute context.
- * Keep this conservative — email rendering engines are unforgiving.
+ * Keep this conservative. Email rendering engines are unforgiving.
  */
 export function esc(input: string | undefined | null): string {
   if (!input) return '';
@@ -38,7 +38,7 @@ export function safeUrl(url: string | undefined | null): string {
 
 /**
  * Normalize an <img src>. Schemeless domain URLs ("esg.example.net/foo.png")
- * would otherwise resolve relative to the host document — and in our preview
+ * would otherwise resolve relative to the host document, and in our preview
  * iframe that document is `about:blank`, so the image 404s. Force an https://
  * prefix in that case. Protocol-relative ("//host/path") and data: URIs pass
  * through unchanged.
@@ -77,7 +77,7 @@ export const SOCIAL_META: SocialIconSet = {
  * working even when image loading is blocked.
  *
  * However we ALSO offer a coloured icon row that uses well-known PNG
- * icon CDN endpoints (Cloudflare's icon CDN style) — we pre-bundle simple
+ * icon CDN endpoints (Cloudflare's icon CDN style). We pre-bundle simple
  * colored SVGs as images served from a tiny built-in API route to avoid
  * external dependencies.
  */
@@ -194,8 +194,8 @@ export function contactRowHtml(row: ContactRow, opts: { textColor: string; muted
 
 /**
  * Render a button using VML for Outlook desktop. This is the single
- * most common cross-client gotcha — without VML the rounded button
- * collapses in Outlook 2007–2019 on Windows.
+ * most common cross-client gotcha. Without VML the rounded button
+ * collapses in Outlook 2007 to 2019 on Windows.
  */
 export function renderButton(opts: {
   text: string;
@@ -254,7 +254,7 @@ export function img(opts: { src: string; alt: string; width: number; height: num
  * for company logos where we don't know the source ratio (square shields,
  * wide wordmarks, etc.). Modern clients use the CSS max-width/max-height to
  * scale proportionally; Outlook desktop falls back to the attr dimensions and
- * may letterbox or stretch — that's the documented trade-off.
+ * may letterbox or stretch, which is the documented trade-off.
  */
 export function logoImg(opts: { src: string; alt: string; maxHeight: number; maxWidth: number; style?: string; display?: 'block' | 'inline-block' }): string {
   const { alt, maxHeight, maxWidth, display = 'block' } = opts;

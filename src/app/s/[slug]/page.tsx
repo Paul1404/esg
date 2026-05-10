@@ -1,14 +1,16 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { prisma } from '@/lib/db';
 import { renderTemplate } from '@/templates';
 import { SignatureSchema, TemplateIdSchema } from '@/lib/validation';
+import { rateLimit } from '@/lib/rate-limit';
 import SharedActions from './SharedActions';
 
 export const dynamic = 'force-dynamic';
 
-// Shared signatures contain personal contact info — keep them out of search
+// Shared signatures contain personal contact info. Keep them out of search
 // engines even though the URLs are technically public.
 export const metadata: Metadata = {
   robots: { index: false, follow: false, nocache: true },
@@ -18,11 +20,24 @@ type Props = { params: Promise<{ slug: string }> };
 
 export default async function SharedSignaturePage({ params }: Props) {
   const { slug } = await params;
+
+  // Cheap sanity check on slug shape so we do not hit the DB on garbage paths.
+  if (!/^[a-km-z2-9]{4,20}$/.test(slug)) notFound();
+
   let sig;
   try {
     sig = await prisma.signature.findUnique({ where: { slug } });
     if (sig) {
-      await prisma.signature.update({ where: { id: sig.id }, data: { views: { increment: 1 } } }).catch(() => {});
+      // Rate-limit the view-counter write per (IP, slug) so a hot link does
+      // not turn into a DB hammer if it is embedded in a busy page.
+      const h = await headers();
+      const ip = h.get('x-forwarded-for')?.split(',')[0]?.trim() || h.get('x-real-ip') || 'anon';
+      const ok = rateLimit(`view:${ip}:${slug}`, { limit: 1, windowMs: 30 * 60 * 1000 });
+      if (ok.ok) {
+        await prisma.signature
+          .update({ where: { id: sig.id }, data: { views: { increment: 1 } } })
+          .catch(() => {});
+      }
     }
   } catch {
     return (
@@ -55,7 +70,7 @@ export default async function SharedSignaturePage({ params }: Props) {
       <section className="mx-auto max-w-3xl px-6 py-10">
         <div className="text-xs text-text-dim">Shared signature</div>
         <h1 className="text-2xl font-semibold tracking-tight">{sig.name}</h1>
-        <div className="text-sm text-text-muted mt-1">Template: {sig.template} · {sig.views} view{sig.views === 1 ? '' : 's'}</div>
+        <div className="text-sm text-text-muted mt-1">Template: {sig.template} &middot; {sig.views} view{sig.views === 1 ? '' : 's'}</div>
 
         <div className="card mt-6 overflow-hidden">
           <div className="bg-white p-6">

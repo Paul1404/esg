@@ -13,7 +13,7 @@ export function renderCompact(d: SignatureData): string {
   const inner = `
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
   <tr><td style="font-family:${fontFamily};font-size:${baseSize}px;color:${text};line-height:1.5;">
-    <strong style="color:${text};">${esc(d.fullName)}${credentialSuffix}</strong> <span style="color:${muted};">— ${esc(d.jobTitle)}${d.company ? `, ${esc(d.company)}` : ''}</span>
+    <strong style="color:${text};">${esc(d.fullName)}${credentialSuffix}</strong> <span style="color:${muted};">&middot; ${esc(d.jobTitle)}${d.company ? `, ${esc(d.company)}` : ''}</span>
   </td></tr>
   <tr><td style="font-family:${fontFamily};font-size:${baseSize - 1}px;color:${muted};line-height:1.5;">${contact.join(' &nbsp;·&nbsp; ')}</td></tr>
   ${d.disclaimer ? `<tr><td style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.4;padding-top:6px;">${escMultiline(d.disclaimer)}</td></tr>` : ''}

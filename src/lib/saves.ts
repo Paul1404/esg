@@ -37,7 +37,7 @@ export function writeSaves(saves: SavedSlot[]): void {
   try {
     window.localStorage.setItem(SAVES_STORAGE_KEY, JSON.stringify(saves));
   } catch {
-    /* quota — surface to caller via try/catch outside */
+    /* quota: surface to caller via try/catch outside */
     throw new Error('Your browser ran out of save space. Delete an old save to make room.');
   }
 }
