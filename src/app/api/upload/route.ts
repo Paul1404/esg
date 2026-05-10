@@ -84,8 +84,7 @@ export async function POST(req: Request) {
   // object-level public-read ACLs, so direct {endpoint}/{bucket}/{key} URLs
   // return AccessDenied the moment a recipient opens the email. The proxy
   // uses the app's S3 credentials and works regardless of bucket policy.
-  const appOrigin =
-    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ?? new URL(req.url).origin;
+  const appOrigin = resolveAppOrigin(req);
   const url = `${appOrigin}/i/${key}`;
 
   // Best-effort persistence; ignore failure so uploads still work without DB.
@@ -98,4 +97,17 @@ export async function POST(req: Request) {
   }
 
   return NextResponse.json({ url, key, width, height, size: processed.length });
+}
+
+// Operators frequently set NEXT_PUBLIC_APP_URL to a bare host like
+// "esg.example.net" — without a scheme, the resulting img src ends up
+// resolved relative to the host document (about:blank in our preview
+// iframe), so the image 404s. Force https:// when missing.
+function resolveAppOrigin(req: Request): string {
+  const raw = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (!raw) return new URL(req.url).origin;
+  const stripped = raw.replace(/\/$/, '');
+  if (/^https?:\/\//i.test(stripped)) return stripped;
+  if (stripped.startsWith('//')) return `https:${stripped}`;
+  return `https://${stripped}`;
 }
