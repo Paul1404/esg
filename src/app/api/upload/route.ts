@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
 import sharp from 'sharp';
-import { isS3Configured, uploadObject } from '@/lib/s3';
+import { isS3Configured, publicUrlForKey, uploadObject } from '@/lib/s3';
 import { prisma } from '@/lib/db';
 
 export const runtime = 'nodejs';
@@ -67,7 +67,16 @@ export async function POST(req: Request) {
 
   const ext = outputType === 'image/jpeg' ? 'jpg' : 'png';
   const key = `signatures/${kind}/${new Date().toISOString().slice(0, 10)}/${nanoid(16)}.${ext}`;
-  const url = await uploadObject({ key, body: processed, contentType: outputType });
+  await uploadObject({ key, body: processed, contentType: outputType });
+
+  // Prefer S3_PUBLIC_BASE_URL (CDN / public bucket) when set. Otherwise serve
+  // through the /i proxy: most S3-compatible providers ignore object-level
+  // public-read ACLs, so direct {endpoint}/{bucket}/{key} URLs return 403
+  // when embedded in emails.
+  const direct = publicUrlForKey(key);
+  const appOrigin =
+    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ?? new URL(req.url).origin;
+  const url = direct ?? `${appOrigin}/i/${key}`;
 
   // Best-effort persistence; ignore failure so uploads still work without DB.
   try {

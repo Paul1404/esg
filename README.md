@@ -79,7 +79,7 @@ The included `railway.toml` declares the Dockerfile builder and a healthcheck pa
 | `AWS_DEFAULT_REGION` | for image uploads | Defaults to `auto` |
 | `AWS_ACCESS_KEY_ID` | for image uploads | |
 | `AWS_SECRET_ACCESS_KEY` | for image uploads | |
-| `S3_PUBLIC_BASE_URL` | optional | Public CDN base URL; falls back to `${endpoint}/${bucket}/${key}` |
+| `S3_PUBLIC_BASE_URL` | optional | Public CDN/bucket base URL. If unset, uploads are served through the in-app `/i/<key>` proxy so private buckets work without object-level public-read ACLs. |
 | `NEXT_PUBLIC_APP_URL` | optional | Public app URL used for share links; falls back to request origin |
 | `PORT` | optional | Defaults to `3000` |
 
