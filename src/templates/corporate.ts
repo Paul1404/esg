@@ -17,10 +17,13 @@ export function renderCorporate(d: SignatureData): string {
     .join('');
   const socialRow = renderSocialRow(d.socials, accent, 24);
   const credentialSuffix = d.credentials ? `, ${esc(d.credentials)}` : '';
+  const logoScale = d.logoScale ?? 1;
+  const logoW = Math.round(140 * logoScale);
+  const logoH = Math.round(40 * logoScale);
 
   const inner = `
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
-  ${d.logoUrl ? `<tr><td style="padding-bottom:12px;">${img({ src: d.logoUrl, alt: d.company, width: 140, height: 40, style: 'object-fit:contain;' })}</td></tr>` : ''}
+  ${d.logoUrl ? `<tr><td style="padding-bottom:12px;">${img({ src: d.logoUrl, alt: d.company, width: logoW, height: logoH, style: 'object-fit:contain;' })}</td></tr>` : ''}
   <tr><td style="font-family:${fontFamily};font-size:${baseSize + 4}px;font-weight:700;color:${text};line-height:1.2;">${esc(d.fullName)}${credentialSuffix}</td></tr>
   <tr><td style="font-family:${fontFamily};font-size:${baseSize}px;color:${accent};line-height:1.4;font-weight:600;padding-top:2px;">${esc(d.jobTitle)}${d.department ? ` &nbsp;|&nbsp; ${esc(d.department)}` : ''}</td></tr>
   <tr><td style="font-family:${fontFamily};font-size:${baseSize}px;color:${text};line-height:1.4;padding-top:2px;">${esc(d.company)}</td></tr>

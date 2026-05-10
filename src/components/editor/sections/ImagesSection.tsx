@@ -157,6 +157,29 @@ export default function ImagesSection({ data, update }: Props) {
       <h3 className="section-title">Images</h3>
       <ImageRow {...rowProps} slot="photo" label="Profile photo" urlKey="photoUrl" hint="Square, 200×200+. EXIF stripped." />
       <ImageRow {...rowProps} slot="logo" label="Company logo" urlKey="logoUrl" hint="Transparent PNG works best." />
+      {data.logoUrl ? (
+        <Field label={`Logo size (${Math.round((data.logoScale ?? 1) * 100)}%)`}>
+          <div className="flex items-center gap-2">
+            <input
+              type="range"
+              min={50}
+              max={400}
+              step={5}
+              value={Math.round((data.logoScale ?? 1) * 100)}
+              onChange={(e) => update('logoScale', Number(e.target.value) / 100)}
+              className="flex-1 accent-[#7c5cff]"
+            />
+            <button
+              type="button"
+              onClick={() => update('logoScale', 1)}
+              className="text-xs text-text-dim hover:text-text transition"
+              title="Reset to 100%"
+            >
+              Reset
+            </button>
+          </div>
+        </Field>
+      ) : null}
       <ImageRow {...rowProps} slot="banner" label="Promo banner" urlKey="bannerUrl" hint="Wide, ~3:1 ratio. Optional click-through below." />
       <Field label="Banner click-through URL">
         <input className="input" value={data.bannerLink ?? ''} onChange={(e) => update('bannerLink', e.target.value)} placeholder="https://example.com/promo" />

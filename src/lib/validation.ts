@@ -24,6 +24,7 @@ export const SignatureSchema = z.object({
 
   photoUrl: z.string().max(1000).optional().default(''),
   logoUrl: z.string().max(1000).optional().default(''),
+  logoScale: z.number().min(0.5).max(4).optional().default(1),
   bannerUrl: z.string().max(1000).optional().default(''),
   bannerLink: z.string().max(1000).optional().default(''),
 
