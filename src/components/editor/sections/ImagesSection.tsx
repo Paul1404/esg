@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import type { SignatureData } from '@/lib/types';
+import { normalizeImgSrc } from '@/lib/template-helpers';
 import Field from '../Field';
 
 type Props = { data: SignatureData; update: <K extends keyof SignatureData>(k: K, v: SignatureData[K]) => void };
@@ -93,7 +94,7 @@ function ImageRow({ slot, label, urlKey, hint, data, update, busy, onUpload }: I
       {url ? (
         <div className="checker rounded border border-border overflow-hidden grid place-items-center p-2 max-h-32">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={url} alt="" className="max-h-24 object-contain" />
+          <img src={normalizeImgSrc(url)} alt="" className="max-h-24 object-contain" />
         </div>
       ) : null}
     </div>

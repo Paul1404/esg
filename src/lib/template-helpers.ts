@@ -36,6 +36,24 @@ export function safeUrl(url: string | undefined | null): string {
   return '';
 }
 
+/**
+ * Normalize an <img src>. Schemeless domain URLs ("esg.example.net/foo.png")
+ * would otherwise resolve relative to the host document — and in our preview
+ * iframe that document is `about:blank`, so the image 404s. Force an https://
+ * prefix in that case. Protocol-relative ("//host/path") and data: URIs pass
+ * through unchanged.
+ */
+export function normalizeImgSrc(url: string | undefined | null): string {
+  if (!url) return '';
+  const trimmed = url.trim();
+  if (!trimmed) return '';
+  if (/^(https?:|data:)/i.test(trimmed)) return trimmed;
+  if (trimmed.startsWith('//')) return `https:${trimmed}`;
+  if (trimmed.startsWith('/')) return trimmed;
+  if (/^[\w.-]+\.[a-z]{2}/i.test(trimmed)) return `https://${trimmed}`;
+  return trimmed;
+}
+
 export type SocialIconSet = Record<SocialPlatform, { label: string; baseUrl: string }>;
 
 export const SOCIAL_META: SocialIconSet = {
@@ -209,7 +227,8 @@ ${inner}
  * attributes (not just CSS) because Outlook ignores CSS sizes.
  */
 export function img(opts: { src: string; alt: string; width: number; height: number; style?: string; round?: boolean }): string {
-  const { src, alt, width, height, round } = opts;
+  const { alt, width, height, round } = opts;
+  const src = normalizeImgSrc(opts.src);
   const radius = round ? `border-radius:${Math.floor(width / 2)}px;` : '';
   const style = `display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;${radius}${opts.style ?? ''}`;
   return `<img src="${esc(src)}" alt="${esc(alt)}" width="${width}" height="${height}" style="${style}" />`;
