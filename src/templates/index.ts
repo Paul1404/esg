@@ -7,6 +7,9 @@ import { renderCreative } from './creative';
 import { renderHorizontal } from './horizontal';
 import { renderPhotoCard } from './photo-card';
 import { renderCompact } from './compact';
+import { renderLogoLeft } from './logo-left';
+import { renderLogoBottom } from './logo-bottom';
+import { renderCentered } from './centered';
 
 export function renderTemplate(id: TemplateId, data: SignatureData): string {
   switch (id) {
@@ -26,6 +29,12 @@ export function renderTemplate(id: TemplateId, data: SignatureData): string {
       return renderPhotoCard(data);
     case 'compact':
       return renderCompact(data);
+    case 'logo-left':
+      return renderLogoLeft(data);
+    case 'logo-bottom':
+      return renderLogoBottom(data);
+    case 'centered':
+      return renderCentered(data);
     default:
       return renderModern(data);
   }

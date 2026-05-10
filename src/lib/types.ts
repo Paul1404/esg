@@ -72,7 +72,10 @@ export type TemplateId =
   | 'creative'
   | 'horizontal'
   | 'photo-card'
-  | 'compact';
+  | 'compact'
+  | 'logo-left'
+  | 'logo-bottom'
+  | 'centered';
 
 export type TemplateMeta = {
   id: TemplateId;
@@ -128,4 +131,7 @@ export const TEMPLATE_LIST: TemplateMeta[] = [
   { id: 'horizontal', name: 'Horizontal', description: 'Inline single-line ribbon' },
   { id: 'photo-card', name: 'Photo Card', description: 'Large photo + tinted backdrop' },
   { id: 'compact', name: 'Compact', description: 'Tight three-line layout' },
+  { id: 'logo-left', name: 'Logo Left', description: 'Logo as left brand mark + vertical divider' },
+  { id: 'logo-bottom', name: 'Logo Bottom', description: 'Content on top, logo anchored below' },
+  { id: 'centered', name: 'Centered', description: 'Centered layout with horizontal divider' },
 ];

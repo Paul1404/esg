@@ -21,7 +21,7 @@ export function renderModern(d: SignatureData): string {
   const divider = d.dividerColor;
 
   const contactRows = buildContactRows(d)
-    .map((r) => contactRowHtml(r, { textColor: text, mutedColor: muted, primaryColor: accent, fontFamily, fontSize: baseSize }))
+    .map((r) => contactRowHtml(r, { textColor: text, mutedColor: muted, primaryColor: accent, fontFamily, fontSize: baseSize, iconStyle: 'pill' }))
     .join('');
 
   const photoCell = d.photoUrl

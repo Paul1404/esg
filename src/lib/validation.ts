@@ -49,6 +49,7 @@ export const SignatureSchema = z.object({
 export const TemplateIdSchema = z.enum([
   'classic', 'modern', 'minimal', 'corporate',
   'creative', 'horizontal', 'photo-card', 'compact',
+  'logo-left', 'logo-bottom', 'centered',
 ]);
 
 export const SaveSignaturePayload = z.object({

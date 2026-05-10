@@ -39,6 +39,9 @@ const TEMPLATE_SPARK: Record<TemplateId, number[]> = {
   horizontal: [100],
   'photo-card': [60, 80, 50],
   compact: [70, 50],
+  'logo-left': [80, 30, 60, 45],
+  'logo-bottom': [40, 70, 55, 80],
+  centered: [50, 80, 50],
 };
 
 export default function HomePage() {
@@ -111,7 +114,7 @@ export default function HomePage() {
         <div className="flex items-end justify-between mb-5">
           <div>
             <h2 className="section-title mb-1">Templates</h2>
-            <p className="text-sm text-text-muted">Eight starting points. Tweak any of them in the editor.</p>
+            <p className="text-sm text-text-muted">Eleven starting points. Tweak any of them in the editor.</p>
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
