@@ -154,45 +154,69 @@ function InstallGuide({ onCopy, onDownload }: { onCopy: () => void; onDownload: 
         title="Gmail (web)"
         steps={[
           'Click "Copy as rich text" above.',
-          'In Gmail, open Settings → See all settings → General.',
-          'Scroll to "Signature" → Create new (or edit).',
-          'Paste into the signature box (Cmd/Ctrl+V).',
-          'Set "Signature defaults" to your new signature, save.',
+          'In Gmail, click the gear icon → See all settings.',
+          'On the General tab, scroll to "Signature" and click + Create new.',
+          'Name the signature, then paste into the editor box (Cmd/Ctrl+V).',
+          'Under "Signature defaults", set it for new mail and replies/forwards.',
+          'Scroll to the bottom and click Save Changes.',
         ]}
         cta={{ label: 'Copy as rich text', onClick: onCopy }}
       />
       <Guide
-        title="Outlook (desktop, Windows)"
+        title="New Outlook (Windows / Mac)"
+        steps={[
+          'Click "Copy as rich text" above.',
+          'Open Outlook → Settings (gear) → Accounts → Signatures.',
+          'If you have multiple accounts, pick the one to apply it to.',
+          'Click + New signature, name it, then paste into the editor.',
+          'Use the checkboxes to apply to new messages and/or replies.',
+          'Click Save.',
+        ]}
+        cta={{ label: 'Copy as rich text', onClick: onCopy }}
+      />
+      <Guide
+        title="Classic Outlook (Windows)"
         steps={[
           'Download the HTML file with the button below.',
-          'Open File Explorer → %APPDATA%\\Microsoft\\Signatures.',
-          'Replace or create a .htm file with the same name.',
-          'Copy any image assets to the matching _files folder.',
-          'Restart Outlook; pick the signature in compose.',
+          'Open File Explorer and paste %APPDATA%\\Microsoft\\Signatures into the address bar.',
+          'Save the downloaded file as <Name>.htm in that folder.',
+          'If your signature has images, put them in a matching <Name>_files folder.',
+          'Restart Outlook → File → Options → Mail → Signatures, pick it as the default.',
         ]}
         cta={{ label: 'Download HTML', onClick: onDownload }}
       />
       <Guide
         title="Apple Mail (macOS)"
         steps={[
-          'Open Mail → Settings → Signatures → "+" to add one.',
-          'Type any placeholder, then close Settings.',
+          'In Mail → Settings → Signatures, click + to add a placeholder signature.',
+          'Uncheck "Always match my default message font", then quit Mail.',
           'Click "Copy as rich text" above.',
-          'Reopen Settings → Signatures, select all in the new sig, paste.',
-          'Uncheck "Always match my default font".',
+          'Reopen Mail → Settings → Signatures, click into the new signature, select all, and paste.',
+          'For pixel-perfect HTML, edit the .mailsignature file under ~/Library/Mail/V10/MailData/Signatures (replace the <body>…</body>) and lock the file in Finder → Get Info.',
         ]}
         cta={{ label: 'Copy as rich text', onClick: onCopy }}
       />
       <Guide
-        title="Outlook on the web / 365"
+        title="Outlook on the web / Microsoft 365"
         steps={[
-          'Click the gear icon → View all Outlook settings.',
-          'Mail → Compose and reply → Email signature.',
-          'Click into the signature box and paste rich text.',
-          'Toggle "Automatically include my signature on…" as desired.',
-          'Save.',
+          'At outlook.office.com, click the gear icon → View all Outlook settings.',
+          'Go to Mail → Compose and reply → Email signature.',
+          'Click + New signature, give it a name, and paste rich text into the editor.',
+          'Use "For new messages" and "For replies/forwards" dropdowns to set defaults.',
+          'Click Save.',
         ]}
         cta={{ label: 'Copy as rich text', onClick: onCopy }}
+      />
+      <Guide
+        title="iOS / Android (mobile)"
+        steps={[
+          'Sync at the server: most mobile apps do not pull your desktop signature automatically.',
+          'For Gmail mobile: Settings → your account → Mobile signature (plain text only).',
+          'For Outlook mobile: Settings → Signature (plain text by default).',
+          'For full HTML on mobile, set it server-side via Outlook on the web or a Workspace admin policy.',
+          'Test by sending yourself a message from the mobile app.',
+        ]}
+        cta={{ label: 'Copy plain text', onClick: onCopy }}
       />
     </div>
   );

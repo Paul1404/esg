@@ -147,6 +147,7 @@ function buildPreviewDocument(signatureHtml: string, mode: ClientMode): string {
 </head>
 <body>
 ${fakeQuote}
+<br/>
 ${signatureHtml}
 </body>
 </html>`;
