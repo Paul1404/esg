@@ -1,8 +1,9 @@
 import type { SignatureData } from '@/lib/types';
-import { esc, escMultiline, img, renderClose, renderCompanyLegal, renderSocialRow, safeUrl, wrapSignature } from '@/lib/template-helpers';
+import { esc, escMultiline, img, renderClose, renderCompanyLegal, renderSocialRow, resolveLayout, safeUrl, wrapSignature } from '@/lib/template-helpers';
 
 export function renderHorizontal(d: SignatureData): string {
   const { fontFamily, fontSize: baseSize, primaryColor: accent, textColor: text, mutedColor: muted, dividerColor: divider } = d;
+  const layout = resolveLayout(d);
   const socialRow = renderSocialRow(d.socials, accent, 22);
 
   const contactPieces: string[] = [];
@@ -11,11 +12,12 @@ export function renderHorizontal(d: SignatureData): string {
   if (d.website) contactPieces.push(`<a href="${safeUrl(d.website)}" style="color:${accent};text-decoration:none;">${esc(d.website.replace(/^https?:\/\//, ''))}</a>`);
 
   const cols = d.photoUrl ? 3 : 2;
+  const gapHalf = Math.max(4, Math.round(layout.gap * 0.6));
   const closeRow = d.complimentaryClose
-    ? `<tr><td colspan="${cols}" style="padding-bottom:8px;">${renderClose({ value: d.complimentaryClose, textColor: text, fontFamily, fontSize: baseSize, paddingBottom: 0 })}</td></tr>`
+    ? `<tr><td colspan="${cols}" style="padding-bottom:${gapHalf}px;">${renderClose({ value: d.complimentaryClose, textColor: text, fontFamily, fontSize: baseSize, paddingBottom: 0 })}</td></tr>`
     : '';
   const legalRow = d.companyLegal
-    ? `<tr><td colspan="${cols}" style="padding-top:8px;${!d.disclaimer ? `border-top:1px solid ${divider};` : ''}">${renderCompanyLegal({ value: d.companyLegal, mutedColor: muted, dividerColor: divider, fontFamily, fontSize: baseSize })}</td></tr>`
+    ? `<tr><td data-esg-region="legal" colspan="${cols}" style="padding-top:${gapHalf}px;${!d.disclaimer && layout.sectionDividers ? `border-top:1px solid ${divider};` : ''}">${renderCompanyLegal({ value: d.companyLegal, mutedColor: muted, dividerColor: divider, fontFamily, fontSize: baseSize })}</td></tr>`
     : '';
 
   const inner = `
@@ -34,7 +36,7 @@ export function renderHorizontal(d: SignatureData): string {
     ${socialRow ? `<td valign="middle" align="right" style="padding-left:12px;">${socialRow}</td>` : ''}
   </tr>
   ${legalRow}
-  ${d.disclaimer ? `<tr><td colspan="${cols}" style="padding-top:8px;border-top:1px solid ${divider};margin-top:8px;"><div style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.4;padding-top:8px;">${escMultiline(d.disclaimer)}</div></td></tr>` : ''}
+  ${d.disclaimer ? `<tr><td data-esg-region="disclaimer" colspan="${cols}" style="padding-top:${gapHalf}px;${layout.sectionDividers ? `border-top:1px solid ${divider};margin-top:${gapHalf}px;` : ''}"><div style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.4;padding-top:${gapHalf}px;">${escMultiline(d.disclaimer)}</div></td></tr>` : ''}
 </table>`;
 
   return wrapSignature({ width: d.layoutWidth, inner, fontFamily, fontSize: baseSize });

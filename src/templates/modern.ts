@@ -10,6 +10,7 @@ import {
   renderClose,
   renderCompanyLegal,
   renderSocialRow,
+  resolveLayout,
   safeUrl,
   wrapSignature,
 } from '@/lib/template-helpers';
@@ -21,6 +22,7 @@ export function renderModern(d: SignatureData): string {
   const text = d.textColor;
   const muted = d.mutedColor;
   const divider = d.dividerColor;
+  const layout = resolveLayout(d);
 
   const contactRows = buildContactRows(d)
     .map((r) => contactRowHtml(r, { textColor: text, mutedColor: muted, primaryColor: accent, fontFamily, fontSize: baseSize, iconStyle: 'pill' }))
@@ -42,16 +44,16 @@ export function renderModern(d: SignatureData): string {
     : '';
 
   const cta = d.ctaText && d.ctaUrl
-    ? `<tr><td style="padding:14px 0 0 0;">${renderButton({ text: d.ctaText, href: d.ctaUrl, bg: accent, fg: '#ffffff', fontFamily, fontSize: baseSize - 1 })}</td></tr>`
+    ? `<tr><td data-esg-region="cta" style="padding:${layout.gap}px 0 0 0;">${renderButton({ text: d.ctaText, href: d.ctaUrl, bg: accent, fg: '#ffffff', fontFamily, fontSize: baseSize - 1 })}</td></tr>`
     : '';
 
   const socialRow = renderSocialRow(d.socials, accent, 26);
   const socialBlock = socialRow
-    ? `<tr><td style="padding:14px 0 0 0;">${socialRow}</td></tr>`
+    ? `<tr><td data-esg-region="socials" style="padding:${layout.gap}px 0 0 0;">${socialRow}</td></tr>`
     : '';
 
   const banner = d.bannerUrl
-    ? `<tr><td style="padding:16px 0 0 0;">${
+    ? `<tr><td data-esg-region="banner" style="padding:${Math.max(layout.gap, 12)}px 0 0 0;">${
         d.bannerLink
           ? `<a href="${safeUrl(d.bannerLink)}" target="_blank" rel="noopener" style="text-decoration:none;">${img({ src: d.bannerUrl, alt: 'Banner', width: d.layoutWidth, height: Math.round(d.layoutWidth * 0.22), style: 'max-width:100%;' })}</a>`
           : img({ src: d.bannerUrl, alt: 'Banner', width: d.layoutWidth, height: Math.round(d.layoutWidth * 0.22), style: 'max-width:100%;' })
@@ -59,14 +61,16 @@ export function renderModern(d: SignatureData): string {
     : '';
 
   const close = renderClose({ value: d.complimentaryClose, textColor: text, fontFamily, fontSize: baseSize, tableRow: true });
-  const legal = renderCompanyLegal({ value: d.companyLegal, mutedColor: muted, dividerColor: divider, fontFamily, fontSize: baseSize, tableRow: true, withDivider: !d.disclaimer });
+  const legal = renderCompanyLegal({ value: d.companyLegal, mutedColor: muted, dividerColor: divider, fontFamily, fontSize: baseSize, tableRow: true, withDivider: !d.disclaimer && layout.sectionDividers });
+  const accentBar = layout.verticalDivider ? `border-left:3px solid ${accent};` : '';
+  const quoteRule = layout.sectionDividers ? `border-top:1px solid ${divider};margin-top:${layout.gap}px;` : '';
 
   const inner = `
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
   ${close}
   <tr>
     ${photoCell}
-    <td valign="top" style="border-left:3px solid ${accent};padding:0 0 0 16px;">
+    <td valign="top" style="${accentBar}padding:0 0 0 16px;">
       ${logoBlock}
       <div style="font-family:${fontFamily};font-size:${baseSize + 4}px;font-weight:700;color:${text};line-height:1.2;">${esc(d.fullName)}${credentialSuffix}${pronouns}</div>
       <div style="font-family:${fontFamily};font-size:${baseSize}px;color:${muted};line-height:1.4;padding-top:2px;">
@@ -82,10 +86,10 @@ export function renderModern(d: SignatureData): string {
   </tr>
   ${cta}
   ${socialBlock}
-  ${d.quote ? `<tr><td style="padding:14px 0 0 0;border-top:1px solid ${divider};margin-top:14px;"><div style="font-family:${fontFamily};font-style:italic;color:${muted};font-size:${baseSize - 1}px;line-height:1.5;padding-top:14px;">“${esc(d.quote)}”</div></td></tr>` : ''}
+  ${d.quote ? `<tr><td data-esg-region="quote" style="padding:${layout.gap}px 0 0 0;${quoteRule}"><div style="font-family:${fontFamily};font-style:italic;color:${muted};font-size:${baseSize - 1}px;line-height:1.5;padding-top:${layout.gap}px;">“${esc(d.quote)}”</div></td></tr>` : ''}
   ${banner}
   ${legal}
-  ${d.disclaimer ? `<tr><td style="padding:14px 0 0 0;"><div style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.4;">${escMultiline(d.disclaimer)}</div></td></tr>` : ''}
+  ${d.disclaimer ? `<tr><td data-esg-region="disclaimer" style="padding:${layout.gap}px 0 0 0;"><div style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.4;">${escMultiline(d.disclaimer)}</div></td></tr>` : ''}
 </table>`;
 
   return wrapSignature({ width: d.layoutWidth, inner, fontFamily, fontSize: baseSize });

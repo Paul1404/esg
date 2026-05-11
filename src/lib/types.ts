@@ -66,6 +66,15 @@ export type SignatureData = {
 
   // Misc
   showPronouns?: boolean;
+
+  // Layout tweaks (interactive in the preview).
+  // showVerticalDivider: vertical rule between columns (Classic, Logo Left).
+  // showSectionDividers: horizontal rule lines between blocks (above legal,
+  // disclaimer, quote, etc.) and decorative rule on Centered.
+  // sectionSpacing: vertical gap between block sections in pixels.
+  showVerticalDivider?: boolean;
+  showSectionDividers?: boolean;
+  sectionSpacing?: number;
 };
 
 export const COMPLIMENTARY_CLOSE_PRESETS: { label: string; value: string }[] = [
@@ -146,6 +155,9 @@ export const DEFAULT_SIGNATURE: SignatureData = {
   disclaimer: '',
   complimentaryClose: '',
   showPronouns: true,
+  showVerticalDivider: true,
+  showSectionDividers: true,
+  sectionSpacing: 14,
 };
 
 export const TEMPLATE_LIST: TemplateMeta[] = [
