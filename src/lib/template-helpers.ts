@@ -126,7 +126,7 @@ export function socialPillCell(opts: {
   const iconSrc = svgIconDataUri(icon.path, fg);
   const cell = `
     <td align="center" valign="middle" width="${size}" height="${size}" style="width:${px};height:${px};background-color:${bg};border-radius:${Math.floor(size / 2)}px;mso-line-height-rule:exactly;line-height:${lh};text-align:center;">
-      <a href="${safe}" target="_blank" rel="noopener" style="color:${fg};text-decoration:none;display:block;width:${px};height:${px};line-height:${lh};text-align:center;" title="${esc(meta.label)}" aria-label="${esc(meta.label)}"><img src="${iconSrc}" alt="${esc(meta.label)}" width="${glyph}" height="${glyph}" style="display:inline-block;vertical-align:middle;border:0;width:${glyph}px;height:${glyph}px;margin-top:${Math.round((size - glyph) / 2)}px;" /></a>
+      <a href="${safe}" target="_blank" rel="noopener" style="color:${fg};text-decoration:none;display:block;width:${px};height:${px};line-height:${lh};text-align:center;" title="${esc(meta.label)}" aria-label="${esc(meta.label)}"><img src="${iconSrc}" alt="${esc(meta.label)}" width="${glyph}" height="${glyph}" style="display:inline-block;vertical-align:middle;border:0;width:${glyph}px;height:${glyph}px;" /></a>
     </td>`;
   return cell;
 }
