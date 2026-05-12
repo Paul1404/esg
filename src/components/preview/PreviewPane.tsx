@@ -6,6 +6,13 @@ import type { SignatureData, TemplateId } from '@/lib/types';
 
 type ClientMode = 'gmail-light' | 'gmail-dark' | 'outlook' | 'apple-mail' | 'mobile';
 
+export type LayoutPatch = {
+  showVerticalDivider?: boolean;
+  showSectionDividers?: boolean;
+  sectionSpacing?: number;
+  layoutWidth?: number;
+};
+
 const MODES: { id: ClientMode; label: string; description: string }[] = [
   { id: 'gmail-light', label: 'Gmail (Light)', description: 'Default web Gmail rendering' },
   { id: 'gmail-dark', label: 'Gmail (Dark)', description: 'Dark theme; <style> tags stripped' },
@@ -14,14 +21,19 @@ const MODES: { id: ClientMode; label: string; description: string }[] = [
   { id: 'mobile', label: 'Mobile (375px)', description: 'iOS / Gmail mobile width' },
 ];
 
-type Props = { data: SignatureData; template: TemplateId };
+type Props = {
+  data: SignatureData;
+  template: TemplateId;
+  onLayoutPatch?: (patch: LayoutPatch) => void;
+};
 
-export default function PreviewPane({ data, template }: Props) {
+export default function PreviewPane({ data, template, onLayoutPatch }: Props) {
   const [mode, setMode] = useState<ClientMode>('gmail-light');
+  const [tweak, setTweak] = useState(false);
   const html = useMemo(() => renderTemplate(template, data), [template, data]);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  const wrappedDoc = useMemo(() => buildPreviewDocument(html, mode), [html, mode]);
+  const wrappedDoc = useMemo(() => buildPreviewDocument(html, mode, tweak), [html, mode, tweak]);
 
   useEffect(() => {
     const iframe = iframeRef.current;
@@ -33,7 +45,42 @@ export default function PreviewPane({ data, template }: Props) {
     doc.close();
   }, [wrappedDoc]);
 
-  const heightForMode = mode === 'mobile' ? 600 : 460;
+  // Wire click hotspots inside the iframe to layout patches in the parent.
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+    const doc = iframe.contentDocument;
+    if (!doc) return;
+    if (!tweak || !onLayoutPatch) return;
+
+    const handler = (e: Event) => {
+      const target = e.target as HTMLElement | null;
+      const hotspot = target?.closest('[data-esg-action]') as HTMLElement | null;
+      if (!hotspot) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const action = hotspot.dataset.esgAction;
+      if (action === 'toggle-vertical-divider') {
+        onLayoutPatch({ showVerticalDivider: !(data.showVerticalDivider !== false) });
+      } else if (action === 'toggle-section-dividers') {
+        onLayoutPatch({ showSectionDividers: !(data.showSectionDividers !== false) });
+      } else if (action === 'spacing-tighter') {
+        const next = Math.max(0, (data.sectionSpacing ?? 14) - 2);
+        onLayoutPatch({ sectionSpacing: next });
+      } else if (action === 'spacing-looser') {
+        const next = Math.min(40, (data.sectionSpacing ?? 14) + 2);
+        onLayoutPatch({ sectionSpacing: next });
+      }
+    };
+    doc.addEventListener('click', handler, true);
+    return () => {
+      doc.removeEventListener('click', handler, true);
+    };
+    // Re-attach when the iframe content has just been (re)written.
+  }, [wrappedDoc, tweak, onLayoutPatch, data.showVerticalDivider, data.showSectionDividers, data.sectionSpacing]);
+
+  const heightForMode = mode === 'mobile' ? 600 : 480;
+  const showOverlayPanel = tweak && !!onLayoutPatch;
 
   return (
     <div className="card">
@@ -42,20 +89,41 @@ export default function PreviewPane({ data, template }: Props) {
           <div className="text-sm font-semibold">Preview</div>
           <div className="text-xs text-text-dim">{MODES.find((m) => m.id === mode)?.description}</div>
         </div>
-        <div className="flex items-center gap-1 bg-bg-elev rounded-md border border-border p-1 flex-wrap">
-          {MODES.map((m) => (
+        <div className="flex items-center gap-2 flex-wrap">
+          {onLayoutPatch ? (
             <button
-              key={m.id}
-              onClick={() => setMode(m.id)}
-              className={`px-2.5 py-1 text-xs rounded transition ${
-                mode === m.id ? 'bg-accent text-white' : 'text-text-muted hover:text-text'
+              type="button"
+              onClick={() => setTweak((t) => !t)}
+              className={`px-2.5 py-1 text-xs rounded-md border transition ${
+                tweak
+                  ? 'bg-accent text-white border-accent'
+                  : 'bg-bg-elev text-text-muted border-border hover:text-text hover:border-border-strong'
               }`}
+              title="Toggle interactive layout tweaking"
             >
-              {m.label}
+              {tweak ? '✓ Tweak mode' : 'Tweak'}
             </button>
-          ))}
+          ) : null}
+          <div className="flex items-center gap-1 bg-bg-elev rounded-md border border-border p-1 flex-wrap">
+            {MODES.map((m) => (
+              <button
+                key={m.id}
+                onClick={() => setMode(m.id)}
+                className={`px-2.5 py-1 text-xs rounded transition ${
+                  mode === m.id ? 'bg-accent text-white' : 'text-text-muted hover:text-text'
+                }`}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
+
+      {showOverlayPanel ? (
+        <LayoutPanel data={data} onPatch={onLayoutPatch!} />
+      ) : null}
+
       <div className={`p-5 grid place-items-center ${modeBackground(mode)}`}>
         <div
           className="bg-white rounded-md shadow-soft overflow-hidden"
@@ -73,10 +141,111 @@ export default function PreviewPane({ data, template }: Props) {
           />
         </div>
       </div>
-      <div className="border-t border-border px-4 py-2 text-xs text-text-dim">
-        This is a simulation. Test with your actual email client before rolling out company-wide.
+      <div className="border-t border-border px-4 py-2 text-xs text-text-dim flex items-center justify-between gap-3 flex-wrap">
+        <span>This is a simulation. Test with your actual email client before rolling out company-wide.</span>
+        {tweak ? (
+          <span className="text-accent">
+            Tweak mode on — click outlines in the preview to toggle them.
+          </span>
+        ) : null}
       </div>
     </div>
+  );
+}
+
+function LayoutPanel({ data, onPatch }: { data: SignatureData; onPatch: (p: LayoutPatch) => void }) {
+  const spacing = data.sectionSpacing ?? 14;
+  const width = data.layoutWidth;
+  return (
+    <div className="border-b border-border bg-accent/5 px-4 py-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div className="flex items-center gap-2 flex-wrap">
+        <Toggle
+          on={data.showVerticalDivider !== false}
+          onChange={(v) => onPatch({ showVerticalDivider: v })}
+          label="Vertical divider"
+        />
+        <Toggle
+          on={data.showSectionDividers !== false}
+          onChange={(v) => onPatch({ showSectionDividers: v })}
+          label="Section dividers"
+        />
+      </div>
+      <div className="flex flex-col gap-2">
+        <SliderRow
+          label="Spacing"
+          value={spacing}
+          min={0}
+          max={40}
+          step={2}
+          suffix="px"
+          onChange={(v) => onPatch({ sectionSpacing: v })}
+        />
+        <SliderRow
+          label="Width"
+          value={width}
+          min={400}
+          max={680}
+          step={10}
+          suffix="px"
+          onChange={(v) => onPatch({ layoutWidth: v })}
+        />
+      </div>
+    </div>
+  );
+}
+
+function Toggle({ on, onChange, label }: { on: boolean; onChange: (v: boolean) => void; label: string }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!on)}
+      className={`px-2.5 py-1 text-xs rounded-md border transition flex items-center gap-1.5 ${
+        on
+          ? 'bg-accent/15 text-accent border-accent/30'
+          : 'bg-bg-elev text-text-muted border-border hover:text-text'
+      }`}
+      aria-pressed={on}
+    >
+      <span className={`h-2 w-2 rounded-full ${on ? 'bg-accent' : 'bg-text-dim'}`} />
+      {label}
+    </button>
+  );
+}
+
+function SliderRow({
+  label,
+  value,
+  min,
+  max,
+  step,
+  suffix,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  suffix?: string;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <label className="flex items-center gap-3 text-xs">
+      <span className="text-text-muted w-16 shrink-0">{label}</span>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="flex-1 accent-[#7c5cff]"
+      />
+      <span className="w-12 text-right tabular-nums text-text-dim">
+        {value}
+        {suffix}
+      </span>
+    </label>
   );
 }
 
@@ -88,7 +257,7 @@ function modeBackground(mode: ClientMode): string {
   return 'bg-[#f6f8fb]';
 }
 
-function buildPreviewDocument(signatureHtml: string, mode: ClientMode): string {
+function buildPreviewDocument(signatureHtml: string, mode: ClientMode, tweak: boolean): string {
   const padding = mode === 'mobile' ? '12px' : '24px';
   const bodyBg = (() => {
     if (mode === 'gmail-dark') return '#202124';
@@ -115,9 +284,7 @@ function buildPreviewDocument(signatureHtml: string, mode: ClientMode): string {
       Hi team,<br/><br/>Quick note before EOD: sharing the v3 mocks.<br/><br/>Thanks,<br/></div>`;
   })();
 
-  // Outlook simulation: forces tables to behave like Word. Clip at 600px,
-  // reset margins, ignore many CSS features. This is approximate; the only
-  // ground-truth is sending a real test email.
+  // Outlook simulation: forces tables to behave like Word.
   const outlookSim =
     mode === 'outlook'
       ? `* { margin: 0; padding: 0; }
@@ -125,13 +292,16 @@ function buildPreviewDocument(signatureHtml: string, mode: ClientMode): string {
          div, p, span { line-height: 1.4; }`
       : '';
 
-  // Gmail dark mode: most clients invert greyscale only when content has
-  // light backgrounds. Reproduce that approximation visually.
   const gmailDarkSim =
     mode === 'gmail-dark'
-      ? `body { background: #202124 !important; color: #e8eaed !important; }
-         /* Gmail keeps signature tables as-is, with their own colors */`
+      ? `body { background: #202124 !important; color: #e8eaed !important; }`
       : '';
+
+  // Tweak-mode visualizers: outline each labelled region, add clickable
+  // hotspots for layout toggles. Hover labels appear so users know what
+  // they're toggling. The chips are absolute-positioned inside the region.
+  const tweakCss = tweak ? TWEAK_CSS : '';
+  const tweakBody = tweak ? TWEAK_BODY_HTML : '';
 
   return `<!doctype html>
 <html>
@@ -143,12 +313,81 @@ function buildPreviewDocument(signatureHtml: string, mode: ClientMode): string {
   body { padding:${padding}; }
   ${outlookSim}
   ${gmailDarkSim}
+  ${tweakCss}
 </style>
 </head>
 <body>
 ${fakeQuote}
 <br/>
 ${signatureHtml}
+${tweakBody}
 </body>
 </html>`;
 }
+
+const TWEAK_CSS = `
+[data-esg-region] {
+  position: relative;
+  outline: 1px dashed rgba(124, 92, 255, 0.55);
+  outline-offset: 1px;
+  transition: outline-color 120ms ease, background-color 120ms ease;
+}
+[data-esg-region]:hover {
+  outline-color: rgba(124, 92, 255, 1);
+  background-color: rgba(124, 92, 255, 0.06);
+}
+[data-esg-region]::before {
+  content: attr(data-esg-region);
+  position: absolute;
+  top: -10px;
+  left: 6px;
+  font: 600 9px/1.4 -apple-system,Segoe UI,Roboto,sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #7c5cff;
+  background: #ffffff;
+  padding: 1px 4px;
+  border-radius: 3px;
+  border: 1px solid rgba(124, 92, 255, 0.3);
+  pointer-events: none;
+  z-index: 2;
+}
+.esg-tweak-bar {
+  position: fixed;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid rgba(124, 92, 255, 0.35);
+  border-radius: 999px;
+  padding: 4px;
+  box-shadow: 0 6px 24px rgba(15, 18, 32, 0.18);
+  z-index: 999;
+  font: 600 11px/1 -apple-system,Segoe UI,Roboto,sans-serif;
+}
+.esg-tweak-bar button {
+  appearance: none;
+  background: #f4f1ff;
+  color: #4b3edc;
+  border: 0;
+  border-radius: 999px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+.esg-tweak-bar button:hover {
+  background: #7c5cff;
+  color: #ffffff;
+}
+`;
+
+const TWEAK_BODY_HTML = `
+<div class="esg-tweak-bar" role="toolbar" aria-label="Quick layout actions">
+  <button type="button" data-esg-action="toggle-vertical-divider" title="Toggle vertical divider">↕ vertical rule</button>
+  <button type="button" data-esg-action="toggle-section-dividers" title="Toggle section dividers">— section rules</button>
+  <button type="button" data-esg-action="spacing-tighter" title="Tighter spacing">− tighter</button>
+  <button type="button" data-esg-action="spacing-looser" title="Looser spacing">+ looser</button>
+</div>
+`;

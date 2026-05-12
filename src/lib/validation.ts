@@ -46,6 +46,10 @@ export const SignatureSchema = z.object({
   disclaimer: z.string().max(2000).optional().default(''),
   complimentaryClose: z.string().max(80).optional().default(''),
   showPronouns: z.boolean().optional().default(true),
+
+  showVerticalDivider: z.boolean().optional().default(true),
+  showSectionDividers: z.boolean().optional().default(true),
+  sectionSpacing: z.number().int().min(0).max(40).optional().default(14),
 });
 
 export const TemplateIdSchema = z.enum([

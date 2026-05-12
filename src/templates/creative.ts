@@ -9,11 +9,13 @@ import {
   renderClose,
   renderCompanyLegal,
   renderSocialRow,
+  resolveLayout,
   wrapSignature,
 } from '@/lib/template-helpers';
 
 export function renderCreative(d: SignatureData): string {
   const { fontFamily, fontSize: baseSize, primaryColor: accent, textColor: text, mutedColor: muted } = d;
+  const layout = resolveLayout(d);
   const rows = buildContactRows(d)
     .map((r) => contactRowHtml(r, { textColor: text, mutedColor: muted, primaryColor: accent, fontFamily, fontSize: baseSize, iconStyle: 'pill' }))
     .join('');
@@ -49,7 +51,7 @@ ${close}
       <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
         ${rows}
       </table>
-      ${d.quote ? `<div style="font-family:${fontFamily};font-style:italic;color:${muted};font-size:${baseSize - 1}px;line-height:1.5;padding-top:12px;border-top:1px dashed ${d.dividerColor};margin-top:12px;">“${esc(d.quote)}”</div>` : ''}
+      ${d.quote ? `<div data-esg-region="quote" style="font-family:${fontFamily};font-style:italic;color:${muted};font-size:${baseSize - 1}px;line-height:1.5;padding-top:${layout.gap}px;${layout.sectionDividers ? `border-top:1px dashed ${d.dividerColor};margin-top:${layout.gap}px;` : ''}">“${esc(d.quote)}”</div>` : ''}
       ${cta ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0">${cta}</table>` : ''}
       ${d.companyLegal ? `<div style="padding-top:12px;">${legal}</div>` : ''}
       ${d.disclaimer ? `<div style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.5;padding-top:12px;">${escMultiline(d.disclaimer)}</div>` : ''}

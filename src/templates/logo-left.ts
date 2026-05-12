@@ -9,12 +9,14 @@ import {
   renderClose,
   renderCompanyLegal,
   renderSocialRow,
+  resolveLayout,
   safeUrl,
   wrapSignature,
 } from '@/lib/template-helpers';
 
 export function renderLogoLeft(d: SignatureData): string {
   const { fontFamily, fontSize: baseSize, primaryColor: accent, textColor: text, mutedColor: muted, dividerColor: divider } = d;
+  const layout = resolveLayout(d);
   const credentialSuffix = d.credentials ? `, ${esc(d.credentials)}` : '';
   const rows = buildContactRows(d)
     .map((r) => contactRowHtml(r, { textColor: text, mutedColor: muted, primaryColor: accent, fontFamily, fontSize: baseSize, iconStyle: 'letter' }))
@@ -25,16 +27,17 @@ export function renderLogoLeft(d: SignatureData): string {
   const logoMaxW = Math.round(120 * logoScale);
 
   const close = renderClose({ value: d.complimentaryClose, textColor: text, fontFamily, fontSize: baseSize });
-  const legal = renderCompanyLegal({ value: d.companyLegal, mutedColor: muted, dividerColor: divider, fontFamily, fontSize: baseSize, withDivider: !d.disclaimer });
+  const legal = renderCompanyLegal({ value: d.companyLegal, mutedColor: muted, dividerColor: divider, fontFamily, fontSize: baseSize, withDivider: !d.disclaimer && layout.sectionDividers });
+  const vRule = layout.verticalDivider ? `border-right:2px solid ${accent};` : '';
 
   const inner = `
 ${close}
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
   <tr>
-    <td valign="middle" width="140" style="width:140px;padding:0 20px 0 0;border-right:2px solid ${accent};text-align:center;">
+    <td data-esg-region="col-left" valign="middle" width="140" style="width:140px;padding:0 20px 0 0;${vRule}text-align:center;">
       ${d.logoUrl ? logoImg({ src: d.logoUrl, alt: d.company, maxHeight: logoMaxH, maxWidth: logoMaxW, style: 'margin-left:auto;margin-right:auto;' }) : `<div style="font-family:${fontFamily};font-size:${baseSize - 1}px;color:${muted};text-transform:uppercase;letter-spacing:1px;">${esc(d.company)}</div>`}
     </td>
-    <td valign="middle" style="padding:0 0 0 20px;">
+    <td data-esg-region="col-right" valign="middle" style="padding:0 0 0 20px;">
       <div style="font-family:${fontFamily};font-size:${baseSize + 4}px;font-weight:700;color:${text};line-height:1.2;">${esc(d.fullName)}${credentialSuffix}</div>
       <div style="font-family:${fontFamily};font-size:${baseSize}px;color:${accent};line-height:1.4;font-weight:600;padding-top:2px;">${esc(d.jobTitle)}${d.department ? ` · ${esc(d.department)}` : ''}</div>
       ${d.logoUrl ? `<div style="font-family:${fontFamily};font-size:${baseSize}px;color:${text};line-height:1.4;padding-top:2px;">${esc(d.company)}</div>` : ''}
@@ -44,13 +47,13 @@ ${close}
       ${socialRow ? `<div style="padding-top:10px;">${socialRow}</div>` : ''}
     </td>
   </tr>
-  ${d.bannerUrl ? `<tr><td colspan="2" style="padding:14px 0 0 0;">${
+  ${d.bannerUrl ? `<tr><td data-esg-region="banner" colspan="2" style="padding:${layout.gap}px 0 0 0;">${
     d.bannerLink
       ? `<a href="${safeUrl(d.bannerLink)}" target="_blank" rel="noopener" style="text-decoration:none;">${img({ src: d.bannerUrl, alt: 'Banner', width: d.layoutWidth, height: Math.round(d.layoutWidth * 0.18), style: 'max-width:100%;' })}</a>`
       : img({ src: d.bannerUrl, alt: 'Banner', width: d.layoutWidth, height: Math.round(d.layoutWidth * 0.18), style: 'max-width:100%;' })
   }</td></tr>` : ''}
-  ${d.companyLegal ? `<tr><td colspan="2" style="padding:14px 0 0 0;">${legal}</td></tr>` : ''}
-  ${d.disclaimer ? `<tr><td colspan="2" style="padding:14px 0 0 0;border-top:1px solid ${divider};"><div style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.5;padding-top:10px;">${escMultiline(d.disclaimer)}</div></td></tr>` : ''}
+  ${d.companyLegal ? `<tr><td data-esg-region="legal" colspan="2" style="padding:${layout.gap}px 0 0 0;">${legal}</td></tr>` : ''}
+  ${d.disclaimer ? `<tr><td data-esg-region="disclaimer" colspan="2" style="padding:${layout.gap}px 0 0 0;${layout.sectionDividers ? `border-top:1px solid ${divider};` : ''}"><div style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.5;padding-top:10px;">${escMultiline(d.disclaimer)}</div></td></tr>` : ''}
 </table>`;
 
   return wrapSignature({ width: d.layoutWidth, inner, fontFamily, fontSize: baseSize });

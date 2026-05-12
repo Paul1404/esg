@@ -9,12 +9,14 @@ import {
   renderClose,
   renderCompanyLegal,
   renderSocialRow,
+  resolveLayout,
   safeUrl,
   wrapSignature,
 } from '@/lib/template-helpers';
 
 export function renderLogoBottom(d: SignatureData): string {
   const { fontFamily, fontSize: baseSize, primaryColor: accent, textColor: text, mutedColor: muted, dividerColor: divider } = d;
+  const layout = resolveLayout(d);
   const credentialSuffix = d.credentials ? `, ${esc(d.credentials)}` : '';
   const rows = buildContactRows(d)
     .map((r) => contactRowHtml(r, { textColor: text, mutedColor: muted, primaryColor: accent, fontFamily, fontSize: baseSize, iconStyle: 'pill' }))
@@ -38,23 +40,23 @@ export function renderLogoBottom(d: SignatureData): string {
       ${rows}
     </table>
   </td></tr>
-  ${d.logoUrl || socialRow ? `<tr><td style="padding:14px 0 0 0;border-top:1px solid ${divider};">
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;margin-top:14px;">
+  ${d.logoUrl || socialRow ? `<tr><td data-esg-region="brandbar" style="padding:${layout.gap}px 0 0 0;${layout.sectionDividers ? `border-top:1px solid ${divider};` : ''}">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;margin-top:${layout.gap}px;">
       <tr>
-        <td valign="middle" style="padding-top:14px;">
+        <td valign="middle" style="padding-top:${layout.gap}px;">
           ${d.logoUrl ? logoImg({ src: d.logoUrl, alt: d.company, maxHeight: logoMaxH, maxWidth: logoMaxW }) : ''}
         </td>
-        ${socialRow ? `<td valign="middle" align="right" style="padding-top:14px;">${socialRow}</td>` : ''}
+        ${socialRow ? `<td valign="middle" align="right" style="padding-top:${layout.gap}px;">${socialRow}</td>` : ''}
       </tr>
     </table>
   </td></tr>` : ''}
-  ${d.bannerUrl ? `<tr><td style="padding:14px 0 0 0;">${
+  ${d.bannerUrl ? `<tr><td data-esg-region="banner" style="padding:${layout.gap}px 0 0 0;">${
     d.bannerLink
       ? `<a href="${safeUrl(d.bannerLink)}" target="_blank" rel="noopener" style="text-decoration:none;">${img({ src: d.bannerUrl, alt: 'Banner', width: d.layoutWidth, height: Math.round(d.layoutWidth * 0.18), style: 'max-width:100%;' })}</a>`
       : img({ src: d.bannerUrl, alt: 'Banner', width: d.layoutWidth, height: Math.round(d.layoutWidth * 0.18), style: 'max-width:100%;' })
   }</td></tr>` : ''}
   ${legal}
-  ${d.disclaimer ? `<tr><td style="padding:14px 0 0 0;"><div style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.5;">${escMultiline(d.disclaimer)}</div></td></tr>` : ''}
+  ${d.disclaimer ? `<tr><td data-esg-region="disclaimer" style="padding:${layout.gap}px 0 0 0;"><div style="font-family:${fontFamily};font-size:${baseSize - 3}px;color:${muted};line-height:1.5;">${escMultiline(d.disclaimer)}</div></td></tr>` : ''}
 </table>`;
 
   return wrapSignature({ width: d.layoutWidth, inner, fontFamily, fontSize: baseSize });

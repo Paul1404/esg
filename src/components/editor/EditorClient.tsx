@@ -4,16 +4,29 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { DEFAULT_SIGNATURE, TEMPLATE_LIST, type SignatureData, type SocialPlatform, type TemplateId } from '@/lib/types';
+import {
+  addSignature,
+  createSignature,
+  defaultSignatureName,
+  deleteSignature,
+  duplicateSignature,
+  getActive,
+  loadSignaturesState,
+  renameSignature,
+  setActive,
+  updateActive,
+  writeSignaturesState,
+  type SignaturesState,
+} from '@/lib/signatures';
 import IdentitySection from './sections/IdentitySection';
 import ContactSection from './sections/ContactSection';
 import ImagesSection from './sections/ImagesSection';
 import SocialsSection from './sections/SocialsSection';
 import StyleSection from './sections/StyleSection';
 import ExtrasSection from './sections/ExtrasSection';
-import PreviewPane from '../preview/PreviewPane';
+import SignatureSwitcher from './SignatureSwitcher';
+import PreviewPane, { type LayoutPatch } from '../preview/PreviewPane';
 import ExportPane from '../preview/ExportPane';
-
-const STORAGE_KEY = 'esg.draft.v1';
 
 type Tab = 'identity' | 'contact' | 'images' | 'socials' | 'style' | 'extras';
 
@@ -26,69 +39,120 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'extras', label: 'Extras' },
 ];
 
+function initialState(): SignaturesState {
+  // SSR / first paint must be deterministic; hydration effect will load
+  // real data from localStorage.
+  const seed = createSignature('modern', DEFAULT_SIGNATURE);
+  return { version: 2, signatures: [seed], activeId: seed.id };
+}
+
 export default function EditorClient() {
   const search = useSearchParams();
   const initialTemplate = (search.get('template') as TemplateId) || 'modern';
-  const [template, setTemplate] = useState<TemplateId>(initialTemplate);
-  const [data, setData] = useState<SignatureData>(DEFAULT_SIGNATURE);
+  const [state, setState] = useState<SignaturesState>(initialState);
   const [tab, setTab] = useState<Tab>('identity');
   const [hydrated, setHydrated] = useState(false);
   const skipNextSave = useRef(false);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- post-hydration init from localStorage
-        if (parsed.data) setData({ ...DEFAULT_SIGNATURE, ...parsed.data });
-        if (parsed.template) setTemplate(parsed.template);
+    const loaded = loadSignaturesState();
+    // If the URL specified ?template=… and the only signature is brand-new,
+    // honour that on first paint. Don't override saved templates otherwise.
+    if (loaded.signatures.length === 1) {
+      const only = loaded.signatures[0];
+      const isPristineName = only.name.startsWith('Jamie Rivers ·');
+      if (isPristineName && only.template !== initialTemplate) {
+        only.template = initialTemplate;
       }
-    } catch { /* ignore */ }
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- post-hydration init from localStorage
+    setState(loaded);
     setHydrated(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (!hydrated) return;
     if (skipNextSave.current) { skipNextSave.current = false; return; }
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ template, data }));
-    } catch { /* ignore quota */ }
-  }, [template, data, hydrated]);
+    writeSignaturesState(state);
+  }, [state, hydrated]);
+
+  const active = getActive(state);
+  const template = active.template;
+  const data = active.data;
 
   const update = <K extends keyof SignatureData>(key: K, value: SignatureData[K]) =>
-    setData((prev) => ({ ...prev, [key]: value }));
+    setState((prev) => updateActive(prev, { data: { ...getActive(prev).data, [key]: value } }));
+
+  const setTemplate = (t: TemplateId) =>
+    setState((prev) => updateActive(prev, { template: t }));
+
+  const applyLayoutPatch = (patch: LayoutPatch) =>
+    setState((prev) => {
+      const cur = getActive(prev).data;
+      const next: SignatureData = { ...cur };
+      if (typeof patch.showVerticalDivider === 'boolean') next.showVerticalDivider = patch.showVerticalDivider;
+      if (typeof patch.showSectionDividers === 'boolean') next.showSectionDividers = patch.showSectionDividers;
+      if (typeof patch.sectionSpacing === 'number') next.sectionSpacing = patch.sectionSpacing;
+      if (typeof patch.layoutWidth === 'number') next.layoutWidth = patch.layoutWidth;
+      return updateActive(prev, { data: next });
+    });
 
   const updateSocial = (idx: number, patch: Partial<{ platform: SocialPlatform; url: string }>) => {
-    setData((prev) => ({
-      ...prev,
-      socials: prev.socials.map((s, i) => (i === idx ? { ...s, ...patch } : s)),
-    }));
+    setState((prev) => {
+      const cur = getActive(prev).data;
+      return updateActive(prev, {
+        data: { ...cur, socials: cur.socials.map((s, i) => (i === idx ? { ...s, ...patch } : s)) },
+      });
+    });
   };
 
   const addSocial = (platform: SocialPlatform) => {
-    setData((prev) => ({ ...prev, socials: [...prev.socials, { platform, url: '' }] }));
+    setState((prev) => {
+      const cur = getActive(prev).data;
+      return updateActive(prev, { data: { ...cur, socials: [...cur.socials, { platform, url: '' }] } });
+    });
   };
 
   const removeSocial = (idx: number) => {
-    setData((prev) => ({ ...prev, socials: prev.socials.filter((_, i) => i !== idx) }));
+    setState((prev) => {
+      const cur = getActive(prev).data;
+      return updateActive(prev, { data: { ...cur, socials: cur.socials.filter((_, i) => i !== idx) } });
+    });
   };
 
-  const reset = () => {
-    if (!confirm('Reset all fields to defaults? Your draft will be cleared.')) return;
-    skipNextSave.current = true;
-    localStorage.removeItem(STORAGE_KEY);
-    setData(DEFAULT_SIGNATURE);
-    setTemplate('modern');
+  const resetActive = () => {
+    if (!confirm('Reset this signature to defaults?')) return;
+    setState((prev) =>
+      updateActive(prev, {
+        template: 'modern',
+        data: { ...DEFAULT_SIGNATURE },
+        name: defaultSignatureName(DEFAULT_SIGNATURE, 'modern'),
+      }),
+    );
   };
+
+  const handleCreate = () => {
+    const sig = createSignature('modern', DEFAULT_SIGNATURE);
+    setState((prev) => addSignature(prev, sig));
+  };
+
+  const handleDuplicate = (id: string) => setState((prev) => duplicateSignature(prev, id));
+  const handleRename = (id: string, name: string) => setState((prev) => renameSignature(prev, id, name));
+  const handleDelete = (id: string) => setState((prev) => deleteSignature(prev, id));
+  const handleSelect = (id: string) => setState((prev) => setActive(prev, id));
 
   const loadSaved = (tpl: TemplateId, next: SignatureData) => {
-    setTemplate(tpl);
-    setData({ ...DEFAULT_SIGNATURE, ...next });
+    // Loading a saved snapshot now replaces the active signature's contents.
+    setState((prev) =>
+      updateActive(prev, {
+        template: tpl,
+        data: { ...DEFAULT_SIGNATURE, ...next },
+      }),
+    );
   };
 
   const formProps = useMemo(() => ({ data, update }), [data]);
-
   const activeTemplate = TEMPLATE_LIST.find((t) => t.id === template);
 
   return (
@@ -103,11 +167,21 @@ export default function EditorClient() {
               <span className="font-semibold tracking-tight hidden sm:inline">ESG</span>
             </Link>
             <span className="text-text-dim hidden sm:inline">/</span>
+            <SignatureSwitcher
+              signatures={state.signatures}
+              activeId={state.activeId}
+              onSelect={handleSelect}
+              onCreate={handleCreate}
+              onDuplicate={handleDuplicate}
+              onRename={handleRename}
+              onDelete={handleDelete}
+            />
+            <span className="text-text-dim hidden sm:inline">/</span>
             <div className="relative min-w-0">
               <select
                 value={template}
                 onChange={(e) => setTemplate(e.target.value as TemplateId)}
-                className="bg-bg-elev border border-border rounded-md pl-2.5 pr-8 py-1.5 text-sm text-text outline-none focus:border-accent hover:border-border-strong transition appearance-none cursor-pointer max-w-[260px] truncate"
+                className="bg-bg-elev border border-border rounded-md pl-2.5 pr-8 py-1.5 text-sm text-text outline-none focus:border-accent hover:border-border-strong transition appearance-none cursor-pointer max-w-[220px] truncate"
                 aria-label="Template"
               >
                 {TEMPLATE_LIST.map((t) => (
@@ -123,7 +197,7 @@ export default function EditorClient() {
             ) : null}
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <button onClick={reset} className="btn-ghost text-xs">Reset</button>
+            <button onClick={resetActive} className="btn-ghost text-xs">Reset</button>
             <Link href="/" className="btn-ghost text-xs">Home</Link>
           </div>
         </div>
@@ -173,7 +247,7 @@ export default function EditorClient() {
         </aside>
 
         <main className="overflow-y-auto bg-bg p-5 space-y-5">
-          <PreviewPane data={data} template={template} />
+          <PreviewPane data={data} template={template} onLayoutPatch={applyLayoutPatch} />
           <ExportPane data={data} template={template} onLoad={loadSaved} />
         </main>
       </div>

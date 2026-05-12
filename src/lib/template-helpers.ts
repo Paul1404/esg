@@ -1,6 +1,29 @@
 import type { SignatureData, SocialPlatform } from './types';
 
 /**
+ * Resolved layout knobs with safe defaults. Templates should call this once
+ * and then use the returned values everywhere they would have hardcoded gaps
+ * or divider rules. Keeps preview-time tweaks (and HTML export) in sync.
+ */
+export type ResolvedLayout = {
+  gap: number;
+  verticalDivider: boolean;
+  sectionDividers: boolean;
+};
+
+export function resolveLayout(d: SignatureData): ResolvedLayout {
+  return {
+    gap: typeof d.sectionSpacing === 'number' ? clamp(d.sectionSpacing, 0, 40) : 14,
+    verticalDivider: d.showVerticalDivider !== false,
+    sectionDividers: d.showSectionDividers !== false,
+  };
+}
+
+function clamp(n: number, lo: number, hi: number): number {
+  return Math.max(lo, Math.min(hi, n));
+}
+
+/**
  * Escape a string for safe inclusion in HTML text or attribute context.
  * Keep this conservative. Email rendering engines are unforgiving.
  */
