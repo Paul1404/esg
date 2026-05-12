@@ -62,7 +62,7 @@ export default function SignatureSwitcher({
 
   const handleDelete = (sig: Signature) => {
     if (signatures.length === 1) {
-      if (!confirm(`Delete "${sig.name}"? This is your last signature — a fresh one will replace it.`)) return;
+      if (!confirm(`Delete "${sig.name}"? This is your last signature, so a fresh one will replace it.`)) return;
     } else if (!confirm(`Delete "${sig.name}"?`)) {
       return;
     }

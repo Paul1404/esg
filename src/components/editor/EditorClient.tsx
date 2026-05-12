@@ -30,13 +30,13 @@ import ExportPane from '../preview/ExportPane';
 
 type Tab = 'identity' | 'contact' | 'images' | 'socials' | 'style' | 'extras';
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: 'identity', label: 'Identity' },
-  { id: 'contact', label: 'Contact' },
-  { id: 'images', label: 'Images' },
-  { id: 'socials', label: 'Socials' },
-  { id: 'style', label: 'Style' },
-  { id: 'extras', label: 'Extras' },
+const TABS: { id: Tab; label: string; icon: string }[] = [
+  { id: 'identity', label: 'Identity', icon: 'M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12Zm0 2.4c-3.3 0-9.8 1.6-9.8 4.9v2.5h19.6v-2.5c0-3.3-6.5-4.9-9.8-4.9Z' },
+  { id: 'contact', label: 'Contact', icon: 'M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6Zm-2 0-8 5-8-5h16Zm0 12H4V8l8 5 8-5v10Z' },
+  { id: 'images', label: 'Images', icon: 'M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2Zm-12.5-5.5 2.5 3 3.5-4.5 4.5 6H5l3.5-4.5Z' },
+  { id: 'socials', label: 'Socials', icon: 'M18 16.1c-.8 0-1.5.3-2 .8L8.9 13a3.3 3.3 0 0 0 0-2L15.9 7c.6.5 1.3.8 2.1.8a3 3 0 1 0-3-3c0 .3 0 .6.1.9L8.1 9.6a3 3 0 1 0 0 4.8l7 4a3 3 0 1 0 3-3.3Z' },
+  { id: 'style', label: 'Style', icon: 'M12 22a10 10 0 1 1 0-20 8 8 0 0 1 8 8c0 4-3 4-3 6 0 3-2 6-5 6Zm-5-10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm3-5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm5 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm3 5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z' },
+  { id: 'extras', label: 'Extras', icon: 'M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3Zm-1 14-4-4 1.4-1.4L11 13.2l4.6-4.6L17 10l-6 6Z' },
 ];
 
 function initialState(): SignaturesState {
@@ -208,26 +208,36 @@ export default function EditorClient() {
           <nav
             role="tablist"
             aria-label="Editor sections"
-            className="flex border-b border-border sticky top-0 bg-bg-elev/95 backdrop-blur z-10"
+            className="grid grid-cols-6 gap-1 p-2 border-b border-border sticky top-0 bg-bg-elev/95 backdrop-blur z-10"
           >
-            {TABS.map((t) => (
-              <button
-                key={t.id}
-                role="tab"
-                aria-selected={tab === t.id}
-                onClick={() => setTab(t.id)}
-                className={`flex-1 px-3 py-3 text-xs font-medium transition relative ${
-                  tab === t.id ? 'text-accent' : 'text-text-muted hover:text-text'
-                }`}
-              >
-                {t.label}
-                <span
-                  className={`absolute bottom-0 left-3 right-3 h-0.5 bg-accent transition-opacity ${
-                    tab === t.id ? 'opacity-100' : 'opacity-0'
+            {TABS.map((t) => {
+              const active = tab === t.id;
+              return (
+                <button
+                  key={t.id}
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setTab(t.id)}
+                  className={`flex flex-col items-center justify-center gap-1 px-2 py-2.5 rounded-md text-[11px] font-medium transition border ${
+                    active
+                      ? 'bg-accent text-white border-accent shadow-soft'
+                      : 'bg-transparent text-text-muted border-transparent hover:text-text hover:bg-bg-elev hover:border-border'
                   }`}
-                />
-              </button>
-            ))}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="16"
+                    height="16"
+                    fill="currentColor"
+                    aria-hidden="true"
+                    className="shrink-0"
+                  >
+                    <path d={t.icon} />
+                  </svg>
+                  <span>{t.label}</span>
+                </button>
+              );
+            })}
           </nav>
           <div className="p-5">
             {tab === 'identity' && <IdentitySection {...formProps} />}

@@ -1,10 +1,7 @@
 import { z } from 'zod';
 
 export const SocialSchema = z.object({
-  platform: z.enum([
-    'linkedin', 'twitter', 'github', 'instagram', 'facebook',
-    'youtube', 'website', 'medium', 'dribbble', 'behance',
-  ]),
+  platform: z.string().min(1).max(40).regex(/^[a-z0-9-]+$/),
   url: z.string().max(500).default(''),
 });
 
