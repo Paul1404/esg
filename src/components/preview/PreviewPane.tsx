@@ -145,7 +145,7 @@ export default function PreviewPane({ data, template, onLayoutPatch }: Props) {
         <span>This is a simulation. Test with your actual email client before rolling out company-wide.</span>
         {tweak ? (
           <span className="text-accent">
-            Tweak mode on — click outlines in the preview to toggle them.
+            Tweak mode on. Click outlines in the preview to toggle them.
           </span>
         ) : null}
       </div>
@@ -386,7 +386,7 @@ const TWEAK_CSS = `
 const TWEAK_BODY_HTML = `
 <div class="esg-tweak-bar" role="toolbar" aria-label="Quick layout actions">
   <button type="button" data-esg-action="toggle-vertical-divider" title="Toggle vertical divider">↕ vertical rule</button>
-  <button type="button" data-esg-action="toggle-section-dividers" title="Toggle section dividers">— section rules</button>
+  <button type="button" data-esg-action="toggle-section-dividers" title="Toggle section dividers">/ section rules</button>
   <button type="button" data-esg-action="spacing-tighter" title="Tighter spacing">− tighter</button>
   <button type="button" data-esg-action="spacing-looser" title="Looser spacing">+ looser</button>
 </div>

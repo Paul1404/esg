@@ -1,14 +1,10 @@
-export type SocialPlatform =
-  | 'linkedin'
-  | 'twitter'
-  | 'github'
-  | 'instagram'
-  | 'facebook'
-  | 'youtube'
-  | 'website'
-  | 'medium'
-  | 'dribbble'
-  | 'behance';
+/**
+ * Slug for a brand-icon definition (see `src/lib/icons.ts`). We keep it loose
+ * (`string` rather than a fixed union) so the picker can offer any icon in the
+ * bundled set and so older localStorage data with unknown slugs degrades to a
+ * generic globe glyph rather than blowing up validation.
+ */
+export type SocialPlatform = string;
 
 export type SocialLink = {
   platform: SocialPlatform;

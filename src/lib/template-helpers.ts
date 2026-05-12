@@ -1,4 +1,5 @@
 import type { SignatureData, SocialPlatform } from './types';
+import { BRAND_BY_SLUG, CONTACT_ICONS, svgIconDataUri } from './icons';
 
 /**
  * Resolved layout knobs with safe defaults. Templates should call this once
@@ -77,32 +78,36 @@ export function normalizeImgSrc(url: string | undefined | null): string {
   return trimmed;
 }
 
-export type SocialIconSet = Record<SocialPlatform, { label: string; baseUrl: string }>;
-
-export const SOCIAL_META: SocialIconSet = {
-  linkedin: { label: 'LinkedIn', baseUrl: 'https://linkedin.com' },
-  twitter: { label: 'X', baseUrl: 'https://twitter.com' },
-  github: { label: 'GitHub', baseUrl: 'https://github.com' },
-  instagram: { label: 'Instagram', baseUrl: 'https://instagram.com' },
-  facebook: { label: 'Facebook', baseUrl: 'https://facebook.com' },
-  youtube: { label: 'YouTube', baseUrl: 'https://youtube.com' },
-  website: { label: 'Website', baseUrl: '' },
-  medium: { label: 'Medium', baseUrl: 'https://medium.com' },
-  dribbble: { label: 'Dribbble', baseUrl: 'https://dribbble.com' },
-  behance: { label: 'Behance', baseUrl: 'https://behance.net' },
-};
+export type SocialMeta = { label: string; baseUrl: string };
 
 /**
- * Inline SVG icons rendered server-side as data URIs. Many email clients
- * (Outlook, some Gmail configs) refuse to load SVG-as-image, so we render
- * platform glyphs as PNG-ready text labels with a tinted pill background
- * via colored table cells instead of icon images. This keeps signatures
- * working even when image loading is blocked.
- *
- * However we ALSO offer a coloured icon row that uses well-known PNG
- * icon CDN endpoints (Cloudflare's icon CDN style). We pre-bundle simple
- * colored SVGs as images served from a tiny built-in API route to avoid
- * external dependencies.
+ * Look up display metadata for a social platform. Falls back to a "Website"
+ * label and no base URL hint for unknown slugs so legacy data and free-form
+ * picks from the icon search still render sensibly.
+ */
+export function socialMeta(platform: SocialPlatform): SocialMeta {
+  const icon = BRAND_BY_SLUG[platform];
+  if (!icon) return { label: platform || 'Website', baseUrl: '' };
+  return { label: icon.name, baseUrl: icon.baseUrl ?? '' };
+}
+
+/**
+ * @deprecated Kept for backwards compatibility with older imports. New code
+ * should call `socialMeta(slug)` so it can handle the broader icon library
+ * without enumerating every platform up front.
+ */
+export const SOCIAL_META = new Proxy({} as Record<string, SocialMeta>, {
+  get(_t, p: string) {
+    return socialMeta(p);
+  },
+});
+
+/**
+ * Render a single social pill as a table cell: a coloured circle with a white
+ * SVG glyph at its centre. The glyph is embedded as a URL-encoded data URI
+ * so it ships without external requests; modern Gmail, Outlook 365, and Apple
+ * Mail render it correctly. Clients that strip data URIs still see the
+ * coloured background, which keeps the row visually intentional.
  */
 export function socialPillCell(opts: {
   platform: SocialPlatform;
@@ -112,41 +117,18 @@ export function socialPillCell(opts: {
   size: number;
 }): string {
   const { platform, url, bg, fg, size } = opts;
-  const label = SOCIAL_META[platform].label;
-  const initial = labelInitial(platform);
+  const meta = socialMeta(platform);
+  const icon = BRAND_BY_SLUG[platform] ?? BRAND_BY_SLUG['website'];
   const px = `${size}px`;
   const lh = `${size}px`;
   const safe = safeUrl(url);
+  const glyph = Math.max(10, Math.round(size * 0.55));
+  const iconSrc = svgIconDataUri(icon.path, fg);
   const cell = `
-    <td align="center" valign="middle" width="${size}" height="${size}" style="width:${px};height:${px};background-color:${bg};border-radius:${Math.floor(size / 2)}px;mso-line-height-rule:exactly;line-height:${lh};text-align:center;font-family:Arial,sans-serif;font-size:${Math.floor(size * 0.55)}px;font-weight:bold;color:${fg};">
-      <a href="${safe}" target="_blank" rel="noopener" style="color:${fg};text-decoration:none;display:block;width:${px};height:${px};line-height:${lh};text-align:center;" title="${esc(label)}" aria-label="${esc(label)}">${esc(initial)}</a>
+    <td align="center" valign="middle" width="${size}" height="${size}" style="width:${px};height:${px};background-color:${bg};border-radius:${Math.floor(size / 2)}px;mso-line-height-rule:exactly;line-height:${lh};text-align:center;">
+      <a href="${safe}" target="_blank" rel="noopener" style="color:${fg};text-decoration:none;display:block;width:${px};height:${px};line-height:${lh};text-align:center;" title="${esc(meta.label)}" aria-label="${esc(meta.label)}"><img src="${iconSrc}" alt="${esc(meta.label)}" width="${glyph}" height="${glyph}" style="display:inline-block;vertical-align:middle;border:0;width:${glyph}px;height:${glyph}px;margin-top:${Math.round((size - glyph) / 2)}px;" /></a>
     </td>`;
   return cell;
-}
-
-function labelInitial(p: SocialPlatform): string {
-  switch (p) {
-    case 'linkedin':
-      return 'in';
-    case 'twitter':
-      return 'X';
-    case 'github':
-      return 'gh';
-    case 'instagram':
-      return 'ig';
-    case 'facebook':
-      return 'f';
-    case 'youtube':
-      return 'YT';
-    case 'website':
-      return 'www';
-    case 'medium':
-      return 'M';
-    case 'dribbble':
-      return 'Db';
-    case 'behance':
-      return 'Be';
-  }
 }
 
 /**
@@ -176,42 +158,84 @@ export function renderSocialRow(
     </table>`;
 }
 
-export type ContactRow = { label: string; value: string; href?: string };
+export type ContactKind = 'email' | 'phone' | 'mobile' | 'website' | 'address';
+export type ContactRow = { kind: ContactKind; label: string; value: string; href?: string };
+
+/**
+ * Turn a free-form address into a Google Maps "search" URL. We use the
+ * `?q=` form rather than `?api=1&query=` so it works on both the web app
+ * and the native Google Maps apps on iOS / Android without an API key.
+ */
+export function mapsHrefForAddress(address: string): string {
+  const trimmed = address.trim();
+  if (!trimmed) return '';
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(trimmed)}`;
+}
 
 export function buildContactRows(d: SignatureData): ContactRow[] {
   const rows: ContactRow[] = [];
-  if (d.email) rows.push({ label: 'E', value: d.email, href: `mailto:${d.email}` });
-  if (d.phone) rows.push({ label: 'T', value: d.phone, href: `tel:${d.phone.replace(/[^+\d]/g, '')}` });
-  if (d.mobile) rows.push({ label: 'M', value: d.mobile, href: `tel:${d.mobile.replace(/[^+\d]/g, '')}` });
-  if (d.website) rows.push({ label: 'W', value: d.website.replace(/^https?:\/\//, ''), href: d.website });
-  if (d.address) rows.push({ label: 'A', value: d.address });
+  if (d.email) rows.push({ kind: 'email', label: 'E', value: d.email, href: `mailto:${d.email}` });
+  if (d.phone) rows.push({ kind: 'phone', label: 'T', value: d.phone, href: `tel:${d.phone.replace(/[^+\d]/g, '')}` });
+  if (d.mobile) rows.push({ kind: 'mobile', label: 'M', value: d.mobile, href: `tel:${d.mobile.replace(/[^+\d]/g, '')}` });
+  if (d.website) rows.push({ kind: 'website', label: 'W', value: d.website.replace(/^https?:\/\//, ''), href: d.website });
+  if (d.address) rows.push({ kind: 'address', label: 'A', value: d.address, href: mapsHrefForAddress(d.address) });
   return rows;
 }
 
-export function contactRowHtml(row: ContactRow, opts: { textColor: string; mutedColor: string; primaryColor: string; fontFamily: string; fontSize: number; iconStyle?: 'letter' | 'pill' }): string {
-  const { textColor, mutedColor, primaryColor, fontFamily, fontSize, iconStyle = 'letter' } = opts;
+function contactIconPathFor(kind: ContactKind): string {
+  switch (kind) {
+    case 'email': return CONTACT_ICONS.email;
+    case 'phone': return CONTACT_ICONS.phone;
+    case 'mobile': return CONTACT_ICONS.mobile;
+    case 'website': return CONTACT_ICONS.globe;
+    case 'address': return CONTACT_ICONS.pin;
+  }
+}
+
+/**
+ * Render one contact line as a table row. Layouts are vertically locked: the
+ * icon cell and the value cell share `valign="middle"` and matching line
+ * heights so the glyph centres on the cap-line of the value text. This is
+ * what fixes the "W is slightly above the website text" misalignment.
+ *
+ * `iconStyle: 'pill'` draws the icon white-on-accent inside a rounded square.
+ * `iconStyle: 'letter'` (or default `'icon'`) draws the icon accent-coloured
+ * with no background, suitable for plainer templates.
+ */
+export function contactRowHtml(row: ContactRow, opts: {
+  textColor: string;
+  mutedColor: string;
+  primaryColor: string;
+  fontFamily: string;
+  fontSize: number;
+  iconStyle?: 'letter' | 'pill' | 'icon';
+}): string {
+  const { textColor, mutedColor, primaryColor, fontFamily, fontSize, iconStyle = 'icon' } = opts;
   const valueHtml = row.href
     ? `<a href="${safeUrl(row.href)}" style="color:${textColor};text-decoration:none;">${esc(row.value)}</a>`
     : esc(row.value);
+  const path = contactIconPathFor(row.kind);
 
-  const labelCell = iconStyle === 'pill'
-    ? (() => {
-        const size = Math.max(18, fontSize + 4);
-        return `<td valign="middle" width="${size + 10}" style="width:${size + 10}px;padding:3px 10px 3px 0;">
-      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
-        <tr><td align="center" valign="middle" width="${size}" height="${size}" style="width:${size}px;height:${size}px;background-color:${primaryColor};border-radius:4px;mso-line-height-rule:exactly;line-height:${size}px;font-family:${fontFamily};font-size:${Math.floor(size * 0.55)}px;font-weight:700;color:#ffffff;text-align:center;">${esc(row.label)}</td></tr>
+  let labelCell: string;
+  if (iconStyle === 'pill') {
+    const size = Math.max(18, fontSize + 4);
+    const glyph = Math.max(10, Math.round(size * 0.6));
+    const iconSrc = svgIconDataUri(path, '#ffffff');
+    labelCell = `<td valign="middle" width="${size + 10}" style="width:${size + 10}px;padding:0 10px 0 0;line-height:${fontSize + 6}px;">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;display:inline-table;vertical-align:middle;">
+        <tr><td align="center" valign="middle" width="${size}" height="${size}" style="width:${size}px;height:${size}px;background-color:${primaryColor};border-radius:4px;mso-line-height-rule:exactly;line-height:${size}px;text-align:center;"><img src="${iconSrc}" alt="${esc(row.label)}" width="${glyph}" height="${glyph}" style="display:inline-block;vertical-align:middle;border:0;width:${glyph}px;height:${glyph}px;" /></td></tr>
       </table>
     </td>`;
-      })()
-    : `<td valign="top" width="20" style="width:20px;padding:2px 8px 2px 0;font-family:${fontFamily};font-size:${fontSize - 2}px;line-height:1.4;color:${primaryColor};font-weight:700;letter-spacing:0.5px;">${esc(row.label)}</td>`;
-
-  const valueAlign = iconStyle === 'pill' ? 'middle' : 'top';
-  const valuePad = iconStyle === 'pill' ? '3px 0' : '2px 0';
+  } else {
+    const glyph = fontSize + 2;
+    const iconSrc = svgIconDataUri(path, primaryColor);
+    labelCell = `<td valign="middle" width="${glyph + 8}" style="width:${glyph + 8}px;padding:0 8px 0 0;line-height:${fontSize + 6}px;"><img src="${iconSrc}" alt="${esc(row.label)}" width="${glyph}" height="${glyph}" style="display:inline-block;vertical-align:middle;border:0;width:${glyph}px;height:${glyph}px;" /></td>`;
+  }
 
   return `
     <tr>
       ${labelCell}
-      <td valign="${valueAlign}" style="font-family:${fontFamily};font-size:${fontSize - 1}px;line-height:1.5;color:${mutedColor};padding:${valuePad};">${valueHtml}</td>
+      <td valign="middle" style="font-family:${fontFamily};font-size:${fontSize - 1}px;line-height:${fontSize + 6}px;color:${mutedColor};padding:3px 0;">${valueHtml}</td>
     </tr>`;
 }
 
@@ -356,7 +380,7 @@ export function buildPlainText(d: SignatureData): string {
   if (d.socials.length) {
     lines.push('');
     d.socials.filter((s) => s.url).forEach((s) => {
-      lines.push(`${SOCIAL_META[s.platform].label}: ${s.url}`);
+      lines.push(`${socialMeta(s.platform).label}: ${s.url}`);
     });
   }
   if (d.companyLegal) {

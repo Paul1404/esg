@@ -123,7 +123,7 @@ type GuideGroup = 'web' | 'desktop' | 'mobile';
 type GuideEntry = {
   title: string;
   group: GuideGroup;
-  /** Steps shown to the user. Strings only — keep them short. */
+  /** Steps shown to the user. Strings only, kept short. */
   steps: string[];
   /** Optional callout shown under the steps (gotchas, caveats). */
   note?: string;
@@ -146,7 +146,7 @@ const GUIDES: GuideEntry[] = [
       'Under "Signature defaults", set it for new mail and replies/forwards.',
       'Scroll to the bottom and click Save Changes.',
     ],
-    note: 'Always Create new — pasting over an existing signature can leave behind invisible styles that break your new one.',
+    note: 'Always Create new. Pasting over an existing signature can leave behind invisible styles that break your new one.',
   },
   {
     title: 'Outlook on the web (Outlook.com / 365)',
@@ -187,7 +187,7 @@ const GUIDES: GuideEntry[] = [
       'Paste (Cmd/Ctrl+V) into the editor box, then click Save.',
       'Optionally set it as default for New messages and Replies/forwards, then Save again.',
     ],
-    note: 'New Outlook is the rebuilt app that resembles Outlook on the web — different from "Classic" Outlook.',
+    note: 'New Outlook is the rebuilt app that resembles Outlook on the web, different from "Classic" Outlook.',
   },
   {
     title: 'Classic Outlook (Windows / Mac)',
@@ -211,9 +211,9 @@ const GUIDES: GuideEntry[] = [
       'Open Mail → Settings → Signatures.',
       'In the left column, pick the email account.',
       'Click + below the middle column, then name the signature.',
-      'Uncheck "Always match my default message font" — without this, formatting is stripped on paste.',
+      'Uncheck "Always match my default message font". Without this, formatting is stripped on paste.',
       'Click into the right preview pane and paste (Cmd+V).',
-      'Images may look broken in the preview — this is an Apple Mail bug. They render correctly in real messages.',
+      'Images may look broken in the preview. This is an Apple Mail bug. They render correctly in real messages.',
     ],
     note: 'For pixel-perfect HTML, edit ~/Library/Mail/V10/MailData/Signatures/<name>.mailsignature and Lock the file in Finder → Get Info.',
   },
@@ -226,9 +226,9 @@ const GUIDES: GuideEntry[] = [
       'In the left sidebar, click your account name (your email address).',
       'Under Default Identity, check the "Use HTML" box.',
       'Click "Copy HTML" above and paste into the Signature Text box.',
-      'No Save button — Thunderbird stores it automatically.',
+      'No Save button. Thunderbird stores it automatically.',
     ],
-    note: 'Compose may show red borders around tables in your signature. Those are editor hints — they do not appear to recipients.',
+    note: 'Compose may show red borders around tables in your signature. Those are editor hints. They do not appear to recipients.',
   },
 
   // ---------- Mobile ----------
@@ -241,7 +241,7 @@ const GUIDES: GuideEntry[] = [
       'On iPhone: open the Gmail app → ☰ menu → Settings.',
       'Tap your account → Signature Settings.',
       'Turn OFF Mobile Signature.',
-      'Send a test email — iOS Gmail will auto-apply your web signature on send (it is NOT shown in compose).',
+      'Send a test email. iOS Gmail will auto-apply your web signature on send (it is NOT shown in compose).',
     ],
     note: 'Gmail iOS only supports plain-text mobile signatures locally, but it auto-pulls your web signature on send when Mobile Signature is off.',
   },
@@ -250,7 +250,7 @@ const GUIDES: GuideEntry[] = [
     group: 'mobile',
     ctaKind: 'plain',
     steps: [
-      'Gmail for Android does NOT auto-pull your web signature — set it per device.',
+      'Gmail for Android does NOT auto-pull your web signature. Set it per device.',
       'Open the Gmail app → ☰ menu → Settings → your account.',
       'Tap Mobile Signature.',
       'Paste plain text only (HTML/images do not render reliably).',
@@ -263,12 +263,12 @@ const GUIDES: GuideEntry[] = [
     group: 'mobile',
     ctaKind: 'rich',
     steps: [
-      'On your computer: email yourself the signature (do NOT copy from Safari mobile — formatting gets stripped).',
+      'On your computer: email yourself the signature (do NOT copy from Safari mobile, formatting gets stripped).',
       'On iPhone: open Mail → open the email → press-and-hold to select the entire signature → Copy.',
       'Open Settings → Mail → Signature (near the bottom).',
       'Pick All Accounts or Per Account, then clear the existing signature.',
       'Press-and-hold the empty field → Paste.',
-      'Formatting will be removed — then shake your phone and tap Undo to restore the HTML formatting.',
+      'Formatting will be removed. Then shake your phone and tap Undo to restore the HTML formatting.',
     ],
     note: 'If "shake to undo" does nothing, enable it: Settings → Accessibility → Touch → Shake to Undo.',
   },
@@ -308,7 +308,7 @@ const GUIDES: GuideEntry[] = [
       'Open Outlook Mobile → profile circle → Settings gear.',
       'Scroll to Signature in the Mail section.',
       'Clear the existing signature.',
-      'Paste plain text — HTML support is unreliable on Android.',
+      'Paste plain text. HTML support is unreliable on Android.',
       'Tap the back arrow / save indicator to confirm.',
     ],
     note: 'Outlook Android currently only renders plain-text signatures consistently. For HTML on Android, set it server-side in Outlook on the web.',
@@ -370,7 +370,7 @@ function InstallGuide({
           </button>
         ))}
         <span className="text-[11px] text-text-dim ml-1">
-          Tip: clipboard format matters — pick the right "Copy" action per client.
+          Tip: clipboard format matters. Pick the right &quot;Copy&quot; action per client.
         </span>
       </div>
 
@@ -464,10 +464,10 @@ function TipsAndGotchas({ open, onToggle }: { open: boolean; onToggle: () => voi
                 <ul className="list-disc list-inside mt-2 space-y-1">
                   <li>Use a transparent-background PNG logo (not a GIF), with colors visible on both light and dark backgrounds.</li>
                   <li>Add a subtle white stroke / glow around dark logo elements in Photoshop / Illustrator so they stay readable when inverted.</li>
-                  <li>Avoid relying on background colors — different clients ignore, invert, or override them.</li>
+                  <li>Avoid relying on background colors. Different clients ignore, invert, or override them.</li>
                   <li>Brand colors near pure black or pure white are most likely to flip. Mid-tone accents survive better.</li>
                   <li>Test on a real device: toggle iOS / Android / Outlook dark mode and view a sent message.</li>
-                  <li>CSS <code className="font-mono text-[10px] bg-bg-elev px-1 rounded">@media (prefers-color-scheme: dark)</code> generally does NOT survive paste into signature editors — they strip <code className="font-mono text-[10px] bg-bg-elev px-1 rounded">&lt;style&gt;</code> tags.</li>
+                  <li>CSS <code className="font-mono text-[10px] bg-bg-elev px-1 rounded">@media (prefers-color-scheme: dark)</code> generally does NOT survive paste into signature editors. They strip <code className="font-mono text-[10px] bg-bg-elev px-1 rounded">&lt;style&gt;</code> tags.</li>
                 </ul>
               </>
             }
@@ -484,7 +484,7 @@ function TipsAndGotchas({ open, onToggle }: { open: boolean; onToggle: () => voi
                   <li>Recipients on non-Outlook clients may see a "Download pictures" warning until they trust your address.</li>
                   <li>Outlook can compress embedded images, softening fine lines and small text in logos.</li>
                   <li>To disable compression: File → Options → Mail → Editor Options → Advanced → uncheck "Do not compress images in file" (Microsoft 365 v2007+).</li>
-                  <li>Outlook on the web and Outlook Mobile behave differently — they generally hot-link rather than embed.</li>
+                  <li>Outlook on the web and Outlook Mobile behave differently. They generally hot-link rather than embed.</li>
                 </ul>
               </>
             }
@@ -495,7 +495,7 @@ function TipsAndGotchas({ open, onToggle }: { open: boolean; onToggle: () => voi
               <>
                 <p>
                   When an email signature with embedded images is replied to or forwarded by another
-                  client (especially iPhone Mail), the inline attachments often get stripped — the
+                  client (especially iPhone Mail), the inline attachments often get stripped, so the
                   recipient sees the layout with the images missing.
                 </p>
                 <ul className="list-disc list-inside mt-2 space-y-1">
