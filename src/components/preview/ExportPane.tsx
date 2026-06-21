@@ -459,7 +459,7 @@ function TipsAndGotchas({ open, onToggle }: { open: boolean; onToggle: () => voi
                   Email clients translate signatures into dark mode differently. Some leave the white
                   background alone, others invert every color, and a few invert only when contrast
                   drops below a threshold. <span className="text-text">Behavior is mostly out of the
-                  sender's control.</span>
+                  sender&apos;s control.</span>
                 </p>
                 <ul className="list-disc list-inside mt-2 space-y-1">
                   <li>Use a transparent-background PNG logo (not a GIF), with colors visible on both light and dark backgrounds.</li>
@@ -481,9 +481,9 @@ function TipsAndGotchas({ open, onToggle }: { open: boolean; onToggle: () => voi
                   hot-linking them. That solves some loading problems but creates new ones:
                 </p>
                 <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>Recipients on non-Outlook clients may see a "Download pictures" warning until they trust your address.</li>
+                  <li>Recipients on non-Outlook clients may see a &quot;Download pictures&quot; warning until they trust your address.</li>
                   <li>Outlook can compress embedded images, softening fine lines and small text in logos.</li>
-                  <li>To disable compression: File → Options → Mail → Editor Options → Advanced → uncheck "Do not compress images in file" (Microsoft 365 v2007+).</li>
+                  <li>To disable compression: File → Options → Mail → Editor Options → Advanced → uncheck &quot;Do not compress images in file&quot; (Microsoft 365 v2007+).</li>
                   <li>Outlook on the web and Outlook Mobile behave differently. They generally hot-link rather than embed.</li>
                 </ul>
               </>
