@@ -1,13 +1,5 @@
 import type { MetadataRoute } from 'next';
-
-function siteUrl(): string {
-  const raw = process.env.NEXT_PUBLIC_APP_URL?.trim();
-  if (!raw) return 'http://localhost:3000';
-  const stripped = raw.replace(/\/$/, '');
-  if (/^https?:\/\//i.test(stripped)) return stripped;
-  if (stripped.startsWith('//')) return `https:${stripped}`;
-  return `https://${stripped}`;
-}
+import { siteUrl } from '@/lib/seo';
 
 export default function robots(): MetadataRoute.Robots {
   const host = siteUrl();
@@ -15,7 +7,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: ['/', '/editor'],
+        allow: ['/', '/editor', '/templates', '/templates/', '/guides', '/guides/'],
         disallow: ['/s/', '/i/', '/api/'],
       },
       {

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { TEMPLATE_LIST, type TemplateId } from '@/lib/types';
+import { GUIDE_SEO } from '@/lib/seo';
 
 export const metadata: Metadata = {
   title: 'Free Email Signature Generator for Outlook, Gmail, Apple Mail',
@@ -58,6 +59,10 @@ const FAQS: { q: string; a: string }[] = [
   {
     q: 'Do I need to create an account?',
     a: 'No. Drafts are stored in your browser. You can optionally generate a recovery code if you want to load your signature on another device.',
+  },
+  {
+    q: 'Can I use this as a free HTML email signature generator?',
+    a: 'Yes. ESG generates copyable rich text and raw HTML signatures, with table-based markup and inline CSS designed for real email clients.',
   },
 ];
 
@@ -121,10 +126,12 @@ export default function HomePage() {
           <div className="max-w-3xl">
             <span className="pill-accent mb-5">Free Email Signature Generator</span>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.05]">
-              Email signatures that render correctly in every client.
+              Free email signature generator for Outlook, Gmail, and Apple Mail.
             </h1>
             <p className="mt-6 text-lg text-text-muted leading-relaxed max-w-2xl">
-              Outlook on Windows renders email with Word. Gmail strips your{' '}
+              Create a professional HTML email signature with templates, logo and photo support,
+              social links, disclaimers, vCard export, and copy-paste setup guides. Outlook on
+              Windows renders email with Word. Gmail strips your{' '}
               <code className="text-accent bg-accent-soft px-1.5 py-0.5 rounded text-base font-mono">
                 &lt;style&gt;
               </code>{' '}
@@ -136,6 +143,9 @@ export default function HomePage() {
               </Link>
               <a href="#templates" className="btn-ghost text-base px-5 py-2.5">
                 See templates
+              </a>
+              <a href="#guides" className="btn-ghost text-base px-5 py-2.5">
+                Setup guides
               </a>
             </div>
             <ul className="mt-8 flex items-center gap-6 text-xs text-text-dim flex-wrap list-none">
@@ -167,9 +177,9 @@ export default function HomePage() {
           {TEMPLATE_LIST.map((t) => (
             <Link
               key={t.id}
-              href={`/editor?template=${t.id}`}
+              href={`/templates/${t.id}`}
               className="card-hover p-5 group flex flex-col gap-4"
-              aria-label={`Open the ${t.name} template`}
+              aria-label={`View the ${t.name} email signature template`}
             >
               <div className="flex items-end gap-1 h-8" aria-hidden="true">
                 {TEMPLATE_SPARK[t.id].map((h, i) => (
@@ -204,6 +214,22 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section id="guides" className="mx-auto max-w-6xl px-6 pb-24" aria-labelledby="guides-heading">
+        <div className="mb-5">
+          <h2 id="guides-heading" className="section-title mb-1">Email signature setup guides</h2>
+          <p className="text-sm text-text-muted">Copy, paste, and test your free HTML signature in the email client you actually use.</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {GUIDE_SEO.map((guide) => (
+            <Link key={guide.slug} href={`/guides/${guide.slug}`} className="card-hover p-5 group">
+              <div className="pill mb-4">{guide.client}</div>
+              <h3 className="font-semibold group-hover:text-accent transition">{guide.title}</h3>
+              <p className="text-sm text-text-muted mt-2 leading-relaxed">{guide.description}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       <section className="mx-auto max-w-6xl px-6 pb-24" aria-labelledby="faq-heading">
         <div className="mb-5">
           <h2 id="faq-heading" className="section-title mb-1">Frequently asked questions</h2>
@@ -231,6 +257,8 @@ export default function HomePage() {
             <a href="https://github.com/Paul1404/esg" target="_blank" rel="noopener" className="hover:text-text transition">
               GitHub
             </a>
+            <Link href="/templates" className="hover:text-accent transition">Templates</Link>
+            <Link href="/guides" className="hover:text-accent transition">Guides</Link>
             <Link href="/editor" className="hover:text-accent transition">Editor</Link>
           </nav>
         </div>

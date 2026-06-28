@@ -1,5 +1,12 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
+import {
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  SITE_TAGLINE,
+  SITE_TITLE,
+  siteUrl,
+} from '@/lib/seo';
 import './globals.css';
 
 const inter = Inter({
@@ -14,22 +21,7 @@ const jetbrainsMono = JetBrains_Mono({
   variable: '--font-mono',
 });
 
-const SITE_NAME = 'ESG';
-const SITE_TAGLINE = 'Free Email Signature Generator';
-const SITE_TITLE = 'Free Email Signature Generator for Outlook, Gmail, Apple Mail';
-const SITE_DESCRIPTION =
-  'Free email signature generator. Build HTML signatures that render correctly in Outlook, Gmail, Apple Mail, and dark mode. No login. Eleven templates. Open source.';
-
-function resolveSiteUrl(): string {
-  const raw = process.env.NEXT_PUBLIC_APP_URL?.trim();
-  if (!raw) return 'http://localhost:3000';
-  const stripped = raw.replace(/\/$/, '');
-  if (/^https?:\/\//i.test(stripped)) return stripped;
-  if (stripped.startsWith('//')) return `https:${stripped}`;
-  return `https://${stripped}`;
-}
-
-const SITE_URL = resolveSiteUrl();
+const SITE_URL = siteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -55,8 +47,14 @@ export const metadata: Metadata = {
   creator: 'ESG',
   publisher: 'ESG',
   category: 'productivity',
+  manifest: '/manifest.webmanifest',
   alternates: {
     canonical: '/',
+  },
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
   },
   openGraph: {
     title: SITE_TITLE,
@@ -65,11 +63,20 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     type: 'website',
     locale: 'en_US',
+    images: [
+      {
+        url: '/opengraph-image',
+        width: 1200,
+        height: 630,
+        alt: 'ESG free email signature generator preview',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
+    images: ['/opengraph-image'],
   },
   robots: {
     index: true,

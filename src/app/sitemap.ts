@@ -1,14 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { TEMPLATE_LIST } from '@/lib/types';
-
-function siteUrl(): string {
-  const raw = process.env.NEXT_PUBLIC_APP_URL?.trim();
-  if (!raw) return 'http://localhost:3000';
-  const stripped = raw.replace(/\/$/, '');
-  if (/^https?:\/\//i.test(stripped)) return stripped;
-  if (stripped.startsWith('//')) return `https:${stripped}`;
-  return `https://${stripped}`;
-}
+import { GUIDE_SEO, TEMPLATE_SEO, siteUrl } from '@/lib/seo';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const host = siteUrl();
@@ -27,11 +18,29 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.9,
     },
-    ...TEMPLATE_LIST.map((t) => ({
-      url: `${host}/editor?template=${t.id}`,
+    {
+      url: `${host}/templates`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.85,
+    },
+    ...TEMPLATE_SEO.map((t) => ({
+      url: `${host}/templates/${t.slug}`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
-      priority: 0.7,
+      priority: 0.8,
+    })),
+    {
+      url: `${host}/guides`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.75,
+    },
+    ...GUIDE_SEO.map((guide) => ({
+      url: `${host}/guides/${guide.slug}`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.75,
     })),
   ];
 }

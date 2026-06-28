@@ -74,6 +74,24 @@ const nextConfig = {
           ...security,
         ],
       },
+      {
+        source: '/templates/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=300, s-maxage=86400, stale-while-revalidate=604800' },
+          ...security,
+        ],
+      },
+      {
+        source: '/guides/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=300, s-maxage=86400, stale-while-revalidate=604800' },
+          ...security,
+        ],
+      },
+      {
+        source: '/manifest.webmanifest',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800' }],
+      },
 
       // Shared signature pages and image proxy: never indexed, never CDN-cached
       // by default. Image proxy itself sets long Cache-Control inline.
