@@ -17,7 +17,7 @@
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "clsx": "^2.1.1",
-    "nanoid": "^5.1.15",
+    "nanoid": "^5.1.16",
     "next": "16.2.9",
     "pg": "^8.22.0",
     "react": "^19.2.7",
