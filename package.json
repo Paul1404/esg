@@ -12,8 +12,8 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1120.0",
-    "@aws-sdk/s3-request-presigner": "^3.1120.0",
+    "@aws-sdk/client-s3": "^3.1129.0",
+    "@aws-sdk/s3-request-presigner": "^3.1129.0",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "clsx": "^2.1.1",
